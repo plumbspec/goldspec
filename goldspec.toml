@@ -1,0 +1,35 @@
+# What this project's spec is, and how far it extends. Read by the `goldspec` command and by any
+# gate this project runs as a test, through `goldspec.conventions_for` — one home, so the two cannot
+# disagree about the same spec.
+#
+# Everything below is stated rather than left to a default, because this file is the first worked
+# example most adopters will see and a file showing only the unusual key teaches nothing about the
+# ordinary ones.
+
+[conventions]
+# Our own habits. A project whose subjects read `REQ` or `sh` says so here and is checked the same.
+#
+# The corpus is a set of process flows, each named by its sigil: `spe` (specify a process), `cus`
+# (keep the corpus), `ent` (enter the method), `vie` (answer an audience), `alt` (weigh an
+# alternative), `sha` (share a word across owners). The namespace is their alternation, because a
+# citation is held against the spec that owns its sigil and no other — and the sibling corpus owns
+# a different set, which is what keeps one joint corpus from two repositories' worth of ids.
+namespace = "(?:spe|cus|ent|vie|alt|sha)"
+flow_dir  = "diagrams"
+# Every flow file's name carries its sigil and a hyphen; `legend.md` — the shared drawing legend,
+# which is not a flow — is the one file the pattern deliberately misses.
+flow_glob = "*-*.md"
+
+
+# **The corpus spans two repositories, and it has to say so.** These flows consume elements the
+# sibling defines — a manifest, a citation, what a run achieved — and it consumes none of ours. A
+# gate seeing half a corpus cannot tell a correct reference to a neighbour from a reference to
+# nothing, and must not guess, so the extent is declared and the sibling is read for the names it
+# defines, never checked (`ent2`). It is gated by its own run, where it is the subject rather than
+# the context.
+#
+# Relative, and that assumes the two repositories are checked out beside each other. What a corpus
+# is was settled by `ent2` — a spec names its siblings, they are resolved against and never checked,
+# and unresolved after them is a fault. What is unsettled is only whether a relative path is how a
+# corpus should say where its neighbour lives.
+siblings = ["../plumb/spec"]

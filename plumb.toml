@@ -1,0 +1,29 @@
+# What this project declares about itself. One file, read by Plumb for every language.
+#
+# **The dependency still runs one way.** This file does not make goldspec depend on plumb, and it
+# is not the direction the README forbids: nothing under `src/` imports the tool, which
+# `test_boundary.py` asserts by reading the source rather than trusting the intention. What it does
+# is put this repository on the same footing as any other adopter — the method is delivered as
+# tests a project runs in its own suite, and the project delivering it is observed like any other.
+adapter = "python"
+
+# The story-id namespaces this repository carries — one sigil per process flow. A citation into a
+# namespace nothing declares is an id belonging to no spec, so this is what lets a citation resolve
+# to something.
+specs = ["spe", "cus", "ent", "vie", "alt", "sha"]
+
+# What counts as production code, in your language's own spelling. Declared as the directory
+# because the tests are not in it — `tests/` sits beside `src/`, so nothing here puts a test frame
+# inside a production root and quietly makes a structural story unable to read `inert`.
+production   = ["src/goldspec"]
+# Where that code's source lives — mutation needs the files, not the compiled form.
+sources      = ["src/goldspec"]
+
+# Where the wired system begins. One console script and nothing else: `goldspec` is a single
+# command, and `check_spec_directory` is reached through it or by an adopter importing the package
+# directly — which is a second entry in every sense except that naming it here would claim the CLI
+# and the library are separate ways in when the first is a thin wrapper over the second.
+entry_points = ["goldspec.cli:main"]
+
+# Off because it is slow, not because it is optional. `plumb board --mutation` for a run.
+mutation = false

@@ -1,0 +1,21 @@
+# Build output is not source: a copy of the tree committed beside the tree is a second home that
+# drifts.
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+.venv/
+
+# Scratch that must never become a commit.
+#
+# `tmp/` — scratch. Ignored because a note written to the wrong one of two similarly-named
+# directories is committed silently.
+tmp/
+
+# `.plumb/` — this project's own cursor and session state. Machine-specific by nature: the cursor
+# may be a symlink to a tree that is not this one, so committing it would put one person's
+# directory layout into every checkout. Nothing describing a particular machine belongs in a file
+# every checkout gets.
+.plumb/
+.pytest_cache/
