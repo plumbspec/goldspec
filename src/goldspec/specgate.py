@@ -163,6 +163,7 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     root, usually. Left out, that check does not run and the report says so: a spec is checkable
     on its own, and a project keeping its spec somewhere else entirely still gets the rest.
     """
+    from goldspec import nodes as node_format
     from goldspec.flowcheck import faults, terminals
 
     report = Report()
@@ -216,7 +217,7 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     # construction, so counting one as an ending would let a flow satisfy this by carrying an
     # unanswered question — the opposite of what the check is for.
     for md in _flow_files(spec, conv):
-        for block in re.findall(r"```mermaid(.*?)```", md.read_text(), re.S):
+        for block in node_format.mermaid_blocks(md.read_text()):
             starts, ends = terminals(block)
             if not starts:
                 report.problems.append(

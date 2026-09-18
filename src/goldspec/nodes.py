@@ -222,8 +222,21 @@ class Chapter:
 
 
 
+#: The fenced block a chapter draws its flow in. `read_flow` reads its edges and `specgate` checks
+#: its terminals, so the pattern has one home rather than one per reader.
+#:
+#: `flowcheck._mermaid_blocks` is the same fence seen differently — by path, carrying the line
+#: numbers a fault message needs — and stays separate for that.
+_MERMAID = re.compile(r"```mermaid(.*?)```", re.S)
+
+
+def mermaid_blocks(text: str) -> list[str]:
+    """Every mermaid block in a chapter, in the order it draws them."""
+    return _MERMAID.findall(text)
+
+
 def _mermaid(text: str) -> str:
-    return "\n".join(re.findall(r"```mermaid(.*?)```", text, re.S))
+    return "\n".join(mermaid_blocks(text))
 
 
 def read_flow(text: str) -> tuple[dict, dict, tuple]:
