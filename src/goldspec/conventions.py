@@ -23,7 +23,12 @@ this changed nothing for them.
 
 from __future__ import annotations
 
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:
+    # Below 3.11 the same parser rides inside this package rather than being installed beside it
+    # (`goldspec._vendor`). One reading of an adopter's file on every version goldspec runs on.
+    from goldspec._vendor import tomli as tomllib
 from dataclasses import dataclass, fields
 from pathlib import Path
 

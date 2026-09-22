@@ -8,10 +8,14 @@ version = "0.1.1"
 description = "The gold-spec methodology and its gates — optional, and unknown to plumb."
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 # pytest, because a gate is a test: the method is delivered as checks a project runs in its own
 # suite, which is what lets plumb observe them without learning that they are method gates.
-dependencies = ["pytest>=9"]
+#
+# Floored at 8 rather than 9 because 9 does not reach Python 3.9, and a floor the dependency
+# cannot be installed at is not a floor. Nothing here imports pytest — what the pin buys is a
+# runner present for the gate an adopter runs, and 8 runs it.
+dependencies = ["pytest>=8"]
 
 # The command, and now only the command. A wheel was once the only shape that worked, because a
 # project's chapter modules did `from goldspec import story` and nothing can import that out of a
@@ -25,7 +29,7 @@ goldspec = "goldspec.cli:main"
 # setuptools because the cut builds the wheel with `--no-build-isolation`: a release that
 # has to reach the network to build is one that cannot be cut from a machine that has no route out,
 # and the offline property is asserted elsewhere rather than assumed.
-dev = ["pytest>=9", "setuptools>=68"]
+dev = ["pytest>=8", "setuptools>=68"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

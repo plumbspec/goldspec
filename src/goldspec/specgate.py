@@ -27,6 +27,8 @@ Every check is a pure source scan: no build, no network, no rendering. That is w
 enough to always run, which is the only reason a gate is ever actually run.
 """
 
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
