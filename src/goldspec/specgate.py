@@ -124,6 +124,15 @@ def declared_in_spec(spec: Path, conv: Conventions) -> list[str]:
             # a gate that cannot fail for a real reason — which is
             # gate that cannot fail for a real reason because it never stops failing for this one.
             found += [kinded for node in chapter.nodes for kinded in node.kinded]
+            # And the ones stated for the flow as a whole, above `## Nodes`, which the format
+            # provides for and this list did not carry — so a citation to one was unsatisfiable.
+            found += list(chapter.kinded)
+            # And the open unknowns. `getting-started` and `docs/README` both name an open unknown
+            # as one of the four kinds of subject; a test citing one was told it was "declared
+            # nowhere", about a bullet sitting in plain sight in the chapter. A subject the method
+            # defines and the gate refuses to see is unsatisfiable however the chapter is written.
+            found += [req.id for node in chapter.nodes
+                      for req in node.requirements if req.kind == "u"]
     return found
 
 
@@ -248,13 +257,30 @@ def _review(spec: Path, conv: Conventions, report: Report) -> None:
     from goldspec import review as process_checks
 
     flows = _flow_files(spec, conv)
+    # This spec's chapters, and the chapters of every spec it names as a sibling. A sibling is read
+    # for what it defines and never checked here — it is gated by its own run, where it is the
+    # subject rather than the context.
+    #
+    # `conv.siblings` was parsed, validated, resolved and then read by nothing. So `siblings` in a
+    # `goldspec.toml` and `--sibling` on the command line both did exactly nothing, while the line
+    # this function prints said an element was taken by nothing "in this chapter **or anywhere
+    # linked**" — asserting a corpus-wide search on a run that had linked nothing. A check that
+    # says out loud that it looked is the worst one to have looking nowhere.
+    linked = list(flows)
+    for other in conv.siblings:
+        linked += sorted((Path(other) / conv.flow_dir).glob(conv.flow_glob))
+
     for path in flows:
-        report.problems += process_checks.review(path, flows)
-        seen = process_checks.observations(path, flows)
+        report.problems += process_checks.review(path, linked, _chapter_prefix(path, conv))
+        seen = process_checks.observations(path, linked)
         if seen:
             report.checked.append(
                 f"{path.name}: {len(seen)} observation(s) — an element nothing downstream takes is "
                 f"a flow's product about as often as it is waste, so this is read and never gated")
+            # And what they were. A count is not what the run saw, and a reader told only that
+            # there are two of something cannot decide anything about either — which is the whole
+            # of what an observation asks of them.
+            report.checked += [f"  {line}" for line in seen]
 
 
 def _nodes(spec: Path, conv: Conventions, report: Report) -> None:

@@ -23,9 +23,13 @@ it constrains.
 This is the single most common defect in a corpus written before the question was asked. It produces
 boxes that cannot be ordered, cannot be chained, and cannot be tested.
 
-## Telling the four kinds apart
+## Where a claim belongs
 
-Once a claim is not a step, it is one of four things. The questions are cheap and the answers differ:
+Five questions, asked in order, and the first *yes* is the answer. They sort a claim into where it
+is written — which is a different question from
+[the four kinds of subject](getting-started.md#the-four-kinds-of-subject), which sorts a thing that
+already has an id by what would settle it. A claim reaching the second row here is a story, and a
+story is one of those four.
 
 | ask | if yes |
 |---|---|
@@ -38,7 +42,11 @@ Once a claim is not a step, it is one of four things. The questions are cheap an
 **Where the citation lives is not in the chapter.** `proves` and `informs` are carried by the
 annotation on the test, and the depth is derived by a run and reported on the board. A chapter that
 also names the tests that prove it is carrying a second copy that goes stale — the same defect as
-reporting its own build status, and it passes every other gate. Checked by `review.carries_proof`.
+reporting its own build status, and it passes every other gate.
+
+`review.carries_proof` catches three shapes of it — a click link to a test file, a trace table keyed
+by test name, and a `Spec source:` line. **A sentence that names a test in prose is not caught**, so
+this one is mostly yours.
 
 Plumb's and goldspec's own chapters do describe citation and depth, because for those two products
 they are **features being specified**. That is a statement about what is built, not a claim that the
@@ -99,12 +107,20 @@ Not what happened, not why, not what was tried. Specifically, none of these belo
   chapter has two sides"*. A spec does not report on its own size or structure.
 - **Build status.** *"specified and unbuilt"*, *"nothing implements one"*. Whether something is built
   is derived from a run and reported on the board. A spec that says it is carrying a second copy that
-  goes stale. Checked by `review.build_status`.
+  goes stale. `review.build_status` catches a short list of *build*-status phrases and a `classDef`
+  named for whether a thing is built. **A status somebody typed — `Status: accepted`, *(done)* — is
+  refused by nothing**, so that half is a reader's.
 
 **Length is the tell.** More than a few simple statements and it has become an essay.
 
 **Measurements stay; attribution goes.** A number needs no owner. *"measured at 346µs a round-trip"*
-is a fact; *"measured on another team's suite"* discloses whose. Checked by `review.attribution`.
+is a fact; *"measured on another team's suite"* discloses whose.
+
+`review.attribution` catches a narrow band of this — a figure in the same sentence as *measured on
+a…*, *the evidence is a…*, *the reference project*, or a possessive naming a pilot, customer, client
+or adopter. It is deliberately narrow, because *a customer* is the business domain of half the specs
+anybody will write and a matcher that fired on it taught readers to stop reading the output. **The
+example above is outside that band**, and so is most phrasing. Read for it.
 
 ## Stories
 
@@ -168,22 +184,39 @@ a step is missing an output or **a whole step is missing**. The chain finds an u
 data alone, without the chapter having to admit it in prose, and finds a missing step nobody has
 noticed at all. Checked by `review.chain`.
 
-**Held.** Information that accumulates and no later step consumes is work being done for nobody, and
-that is where process inefficiency is found. Checked by `review.unconsumed`, which searches the whole
-corpus for a reader before calling anything idle.
+**What accumulates.** Information a node leaves with that no later step consumes is work being done
+for nobody, and that is where process inefficiency is found. This is what the older shape's `Held`
+column was for; there is no `Held` column now, and a step that keeps something to itself says so as
+a requirement. Reported by `review.unconsumed`, which searches the whole corpus for a reader before
+calling anything idle — and which is counted rather than gated, because a flow's own product looks
+identical to waste from the data alone.
 
 ## What the gates cannot see
 
-`review.py` reports rather than gates until `Conventions.review` is on. Read its output knowing:
+`review.py` is two lists and no flag between them, because a flag over both meant turning one
+report off turned every real gate off with it. **`review()` fails a run**: the chain, provenance,
+the stamp, padding, prohibitions, build status, a named test, an attributed figure, a row that
+restates a step, and the sub-flow checks. **`observations()` is counted and never fails one** — `unconsumed` is the whole of
+it, because it has no invariant to hold. There is nothing to switch on.
+
+Read the output knowing:
 
 - **A check passing on a format it cannot parse is worse than no check.** If a check says `ok`,
-  confirm it read something. This is why there is exactly one reader: `nodes.read` observes the
-  markdown once and hands back the chapter, and every check is a pure function of that. A check that
-  went back to the source would be a second observer, and two observers of one thing are two answers
-  waiting to differ.
-- **`chain` cannot see a sub-flow's entry point.** A chapter whose nodes nest under a parent takes its
-  first inputs from that parent, and `chain` reports them as unproduced. Read those against
-  `cross_flow`. Do not edit a correct draft to satisfy them.
+  confirm it read something. That is what `nodes.read` is for: the markdown is observed once into a
+  chapter, and every check over it is a pure function of that object, so no two of them can form
+  different opinions of what a row says.
+
+  **The whole run is not yet one read.** `review`, `cross_flow` and `observations` each parse the
+  chapter again, and `flowcheck` opens the file for itself — one chapter is read from disk several
+  times per run. Each of those is internally consistent and none of them is free: the section scan
+  used to be one of them, and its second reading of a `##` line disagreed with the first about
+  whether a heading inside a code fence was a heading.
+- **A sub-flow's entry point is `chain`'s business too, now.** A row whose provenance is `parent`
+  answers *where does this come from* with something outside the flow, exactly as `authored` does,
+  so `chain` passes over it rather than reporting it unproduced. What holds the two sides together
+  is `cross_flow`, which reads the parent and the child against each other. An earlier version of
+  this page told readers to expect chain faults on those rows and dismiss them, which was a
+  standing licence to ignore a real failure.
 - **`unconsumed` cannot see a later run.** A cursor written today is read tomorrow by the same
   chapter, and no static walk of one flow will find that.
 

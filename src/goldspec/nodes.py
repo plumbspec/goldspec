@@ -8,15 +8,16 @@ all of it backs up into the claim. A trace row can reach **486 words** against a
 claim, a decision, three pieces of history, a reading, a cross-reference, two constraints, and two
 steps that had never been drawn because there was no flow for them to be steps in.
 
-So a node owns its story, and beneath it the information it moves. The chapter keeps one element
-list, because an element is defined once for the corpus (`ent2`) and a per-node table would be a
-second home for every element more than one node touches. A node **references**; it never defines.
+So a node owns its story, and beneath it the information it moves: one five-column table whose
+every row carries an id, an `In` or an `Out`, and the provenance saying where it came from. There is
+no chapter-level list of information and no `Held` column — a row is stated once, by the step that
+moves it.
 
-**What that buys, beyond tidiness.** Each node's In/Held/Out is a citable subject, so *does this step
-have the information it needs* stops being a thing a reviewer checks and becomes a thing a run
-derives. And an element's producers and consumers are then already stated, which makes the data-flow
-diagram derivable rather than drawn — nobody maintains it, and an element produced by no node or
-consumed by none is a dangling half-edge the gate can name.
+**What that buys, beyond tidiness.** Each row is a citable subject, so *does this step have the
+information it needs* stops being a thing a reviewer checks and becomes a thing a run derives. And
+each piece of information's producers and consumers are then already stated, which makes the
+data-flow diagram derivable rather than drawn — nobody maintains it, and something produced by no
+node or consumed by none is a dangling half-edge the checks can name.
 
 **Reporting before gating.** Every corpus that exists predates this format. A gate demanding it would
 fail all of them on the release that introduced it, so a chapter without a `## Nodes` section is read
@@ -32,12 +33,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-#: The sections a node-format chapter carries, in the order they must appear.
-#:
-#: `## Elements` and `## Nodes` replace the older `## Story → test trace`, `## Input → process →
-#: output` and `## Data definitions`; the last two are unchanged. Order is checked for the same
-#: reason `spe3` checks it: a glossary is looked up rather than read through, and the only reliable
-#: way to be findable is to be in the same place every time.
+#: The sections a node-format chapter carries, in the order they must appear. Two, and no more:
+#: `## Nodes` replaces the older `## Story → test trace`, `## Input → process → output` and
+#: `## Data definitions` together, because all three said something about a step from outside it.
+#: Order is checked for the same reason `spe3` checks it: a glossary is looked up rather than read
+#: through, and the only reliable way to be findable is to be in the same place every time.
+#: `WORKING_NOTES` below is the one trailing heading exempt from the set.
 SECTIONS = ("Nodes", "Glossary")
 
 #: The `####` headings inside a node block, in the order they must appear. Information first
@@ -64,6 +65,17 @@ _INFO_ROW = re.compile(
     r"\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|",
     re.M | re.I)
 
+#: Any row of a five-column table, so a row `_INFO_ROW` could not read is still *seen*.
+#:
+#: A row with no id, or with an `IO` outside the set, matched nothing and was dropped before every
+#: downstream check — so an unidentified required input from a step that does not exist passed a
+#: clean run, and `Input`/`Output` (the older shape's own spelling) vanished rather than being
+#: refused. The same silent-drop as a misformed requirement bullet, one table over.
+_TABLE_ROW = re.compile(r"^\|(?:[^|\n]*\|){4,}\s*$", re.M)
+
+#: The header of an Information table, and the `|---|` rule under it. Neither is a row.
+_NOT_A_ROW = re.compile(r"^\|\s*(information\s*\||\s*:?-+:?\s*\|)", re.I)
+
 #: A node opens a `###` block and carries its id first: `### ch1-2 · check availability`.
 #: The id may be backticked or not; the separator may be `·`, `—` or `-`.
 _NODE = re.compile(r"^###\s+`?([A-Za-z]+\d[\w.\-]*\d|[A-Za-z]+\d)`?\s*[·—-]?\s*(.*)$", re.M)
@@ -89,7 +101,20 @@ _STORY = re.compile(r"^> (.+(?:\n> .+)*)", re.M)
 _NODE_SECTION = re.compile(r"^#### (.+?)\s*$", re.M)
 
 #: One requirement or unknown: `  * spe1-ur3 - the flow is drawn before any step is described`.
-_REQUIREMENT = re.compile(r"^\s*\*\s+((([\w.-]+?)-(ur|sr|nfr|u))\d+)\s*-\s*(.+)$", re.M)
+#: `-`, `\u2013` and `\u2014` all read the same, as they do in a `###` heading — the page says so
+#: there and a reader carries the habit across. A colon or nothing still parses as nothing, and
+#: `_REQUIREMENT_SHAPED` names it.
+_REQUIREMENT = re.compile(
+    r"^\s*\*\s+((([\w.-]+?)-(ur|sr|nfr|u))\d+)\s*[-\u2013\u2014]\s*(.+)$", re.M)
+
+#: A bullet that OPENS with a requirement-shaped id, however it goes on.
+#:
+#: `_REQUIREMENT` wants ` - ` between the id and the text. Written with a colon or an em dash the
+#: bullet matches nothing, and a requirement nothing parsed is a requirement no check holds: the
+#: ownership check and the duplicate check simply go quiet, on a line that looks exactly right.
+#: Nothing counts requirements either, so there was no number a reader could have compared — which
+#: is the one remedy this method offers for a check that read nothing.
+_REQUIREMENT_SHAPED = re.compile(r"^\s*\*\s+([\w.-]+?-(?:ur|sr|nfr|u)\d+)", re.M | re.I)
 
 _H2 = re.compile(r"^## ", re.M)
 _H3 = re.compile(r"^### ", re.M)
@@ -165,6 +190,10 @@ class Node:
     sections: tuple = ()
     #: Ids of the decisions and parameters stated under this node.
     kinded: tuple = ()
+    #: Bullets that open with a requirement-shaped id and that nothing could read.
+    malformed: tuple = ()
+    #: Rows of a five-column table that the row parser could not read.
+    unreadable: tuple = ()
     #: The blockquote under the heading — *as a role I want something so that a goal*. What the old
     #: trace row's claim became, and the reason a backlog is still readable off a converted chapter:
     #: the title says what the step is called and only this says what somebody wants.
@@ -211,6 +240,13 @@ class Chapter:
     var2id: dict = field(default_factory=dict)
     #: Ids the diagram draws as a drill-down, so nothing has to re-read the shapes.
     subflows: tuple = ()
+    #: Decisions and parameters stated for the whole flow, above `## Nodes`. A constraint that
+    #: genuinely is not one step's — a regulatory clock binding the whole process — has nowhere
+    #: else to go, and hanging it on whichever node happens to start is bending the model to fit
+    #: the tool. It is read here so that it is still a subject: it was parsed only inside node
+    #: blocks, so one written where the format says to write it was declared nowhere, cited
+    #: nowhere, and namespaced to nothing — `zz9-D9` between the diagram and `## Nodes` passed.
+    kinded: tuple = ()
 
     @property
     def name(self) -> str:
@@ -245,8 +281,14 @@ def read_flow(text: str) -> tuple[dict, dict, tuple]:
     # The id may be bold or bare. Requiring `<b>` read every diagram that did not use it as naming
     # no nodes at all — and a check whose input is silently empty passes without comparing anything,
     # which is the failure this whole module is arranged to prevent.
+    # INDENTED BY ANY AMOUNT. This read `^\s{4}` — exactly four whitespace characters — so a
+    # diagram indented by two, six or eight spaces, all of which mermaid renders identically,
+    # produced an EMPTY map. `chain`, `provenance`'s reachability half and `unconsumed` all key
+    # off it, so they went silent together, while the drawn-and-expanded check reported every node
+    # in the chapter as "not in the flow" — four faults naming the wrong cause, and three real
+    # gates off. Nothing documented the four, because nothing knew it was load-bearing.
     var2id = {}
-    for m in re.finditer(r"^\s{4}(\w+)\s*[\[\({>]+\s*(?:<b>)?\s*([A-Za-z]+\d[\w.-]*)", mer, re.M):
+    for m in re.finditer(r"^[ \t]+(\w+)\s*[\[\({>]+\s*(?:<b>)?\s*([A-Za-z]+\d[\w.-]*)", mer, re.M):
         var2id.setdefault(m.group(1), m.group(2))
     edges: dict[str, set] = {}
     for line in mer.splitlines():
@@ -259,7 +301,7 @@ def read_flow(text: str) -> tuple[dict, dict, tuple]:
                 edges.setdefault(a, set()).add(b)
     subflows = tuple(sorted(
         {m.group(1) for m in
-         re.finditer(r"^\s{4}\w+\[\[\s*(?:<b>)?\s*([A-Za-z]+\d[\w.-]*)", mer, re.M)}))
+         re.finditer(r"^[ \t]+\w+\[\[\s*(?:<b>)?\s*([A-Za-z]+\d[\w.-]*)", mer, re.M)}))
     return edges, var2id, subflows
 
 
@@ -296,19 +338,33 @@ def read(path: Path) -> Chapter | None:
             Row(owner, row_id, "In" if io.lower() == "in" else "Out", desc.strip(),
                 names_in(desc), required.strip(), provenance.strip())
             for row_id, owner, io, desc, required, provenance in _INFO_ROW.findall(block))
+        # Rows the five-column parser could not read, so nothing is dropped in silence.
+        read_rows = {row.row_id for row in rows}
+        unreadable = tuple(
+            line.strip() for line in _TABLE_ROW.findall(block)
+            if not _NOT_A_ROW.match(line)
+            and not any(rid in line for rid in read_rows))
         told = _STORY.search(block)
         story = " ".join(line.lstrip("> ") for line in told.group(0).splitlines()) if told else ""
         requirements = tuple(
             Requirement(owner, rid, kind, body.strip())
             for rid, _stem, owner, kind, body in _REQUIREMENT.findall(block))
+        read_ids = {req.id for req in requirements}
+        malformed = tuple(sorted(
+            {rid for rid in _REQUIREMENT_SHAPED.findall(block)} - read_ids))
         sections = tuple(_NODE_SECTION.findall(block))
         nodes.append(Node(node_id, title, rows,
-                          requirements, sections,
-                          tuple(sorted({m[0] for m in _KINDED.findall(block)})),
-                          story.replace("**", "").strip()))
+                          requirements=requirements, sections=sections,
+                          kinded=tuple(sorted({m[0] for m in _KINDED.findall(block)})),
+                          malformed=malformed, unreadable=unreadable,
+                          story=story.replace("**", "").strip()))
 
     edges, var2id, subflows = read_flow(text)
-    return Chapter(Path(path), tuple(nodes), text, edges, var2id, subflows)
+    # Everything above `## Nodes` — the title, the stamp, the story, the diagram, and any
+    # constraint stated for the flow as a whole.
+    preamble = text[:text.index(nodes_body)] if nodes_body else text
+    flow_level = tuple(sorted({m[0] for m in _KINDED.findall(preamble)}))
+    return Chapter(Path(path), tuple(nodes), text, edges, var2id, subflows, flow_level)
 
 
 def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
@@ -324,9 +380,21 @@ def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
     found = []
     name = chapter.path.name
 
-    headings = re.findall(r"^## (.+?)\s*$", chapter.path.read_text(encoding="utf-8"), re.M)
-    # A trailing section that says of itself it is not part of the chapter is not held to the set.
-    carried = tuple(h for h in headings if not h.startswith(WORKING_NOTES))
+    # Off the chapter this was handed, and with fenced blocks removed first. It re-read the file
+    # — a second observer, against a page promising exactly one — and scanned raw, so a chapter
+    # quoting a `##` heading inside a code block was told its section set was wrong. The two
+    # defects are the same one: a check that goes back to the source forms its own opinion of what
+    # a line is.
+    headings = re.findall(r"^## (.+?)\s*$", re.sub(r"```.*?```", "", chapter.text, flags=re.S), re.M)
+    # A section that says of itself it is not part of the chapter is not held to the set — and it
+    # has to be TRAILING. The exemption was granted wherever the heading sat, so the two passages
+    # saying it "goes last" were enforced by nothing, and a chapter could open with its working
+    # notes and still pass. The heading keeps its own wording after the name (`## Working notes —
+    # not part of the chapter`), which is the corpus convention and the whole reason ignoring it
+    # is honest rather than lenient.
+    carried = tuple(headings)
+    while carried and carried[-1].startswith(WORKING_NOTES):
+        carried = carried[:-1]
     owed = SECTIONS
     if carried != owed:
         found.append(f"{name}: sections are {list(carried)}, not {list(owed)} — a reader looking "
@@ -335,6 +403,13 @@ def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
     if not chapter.nodes:
         found.append(f"{name}: a Nodes section that declares no nodes — a chapter states its steps, "
                      "or nothing can be checked about them")
+
+    kinded_seen = set()
+    for kinded in chapter.kinded:
+        if not kinded.startswith(prefix):
+            found.append(f"{name}#{kinded} is stated for the whole flow and is not namespaced to "
+                         f"its chapter — expected {prefix}-<kind><n>")
+        kinded_seen.add(kinded)
 
     seen, requirements_seen = set(), set()
     for node in chapter.nodes:
@@ -354,6 +429,13 @@ def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
         for kinded in node.kinded:
             if not kinded.startswith(prefix):
                 found.append(f"{name}#{kinded} is not namespaced to its chapter")
+            # Flow-level and node-level decisions share one number series per chapter, which is
+            # only true if something holds them to it.
+            if kinded in kinded_seen:
+                found.append(f"{name}#{kinded} is stated more than once — a subject says one "
+                             f"thing, and an id carrying two is answered for by whichever is "
+                             f"read first")
+            kinded_seen.add(kinded)
 
         # The four headings, present and in order. A constraint is argued with by a different
         # reader depending on its kind, so a node that runs them together, drops one or reorders
@@ -362,6 +444,24 @@ def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
             found.append(f"{name}#{node.id} states {list(node.sections)}, not "
                          f"{list(NODE_SECTIONS)} — a reader looking for what constrains a step "
                          f"should never have to hunt for it")
+
+        for line in node.unreadable:
+            found.append(f"{name}#{node.id} has a table row nothing can read — a row is "
+                         f"`| <id>-infN | In or Out | <description> | <required> | <provenance> |`, "
+                         f"and one written otherwise is dropped before every check sees it: {line}")
+
+        for row in node.rows:
+            # The same rule a requirement is already held to. A row named `ch1-1-inf9` under node
+            # `ch1-3` resolves to whichever a reader finds first, and only one of the two id
+            # families was checked — with nothing saying which.
+            if row.node_id != node.id:
+                found.append(f"{name}#{row.row_id} is stated under {node.id} and named for "
+                             f"{row.node_id} — a row is filed on the step that moves it")
+
+        for rid in node.malformed:
+            found.append(f"{name}#{rid} is written in a shape nothing reads — a requirement bullet "
+                         f"is `* {rid} - <what it requires>`, with a hyphen between the id and the "
+                         f"text. Written otherwise it parses as nothing, and no check holds it")
 
         for req in node.requirements:
             # A requirement belongs to the step it constrains, and says so in its id.

@@ -25,7 +25,9 @@ boundary.
 
 ## 2 · The five questions, in order
 
-Asked of every claim before it is written anywhere:
+Asked of every claim before it is written anywhere, first *yes* wins. This sorts a claim into where
+it goes; what would *settle* a subject once it has an id is the four kinds in
+[getting-started](getting-started.md#the-four-kinds-of-subject), which is a different cut.
 
 | ask | if yes |
 |---|---|
@@ -110,9 +112,12 @@ problem — it is a missing requirement, and the fix is to find it and give it a
 This is verifiable and it verifies. Deleting a node's one remaining sentence leaves it visibly thin,
 and what the sentence was hiding is a real requirement or a real open question.
 
-The same rule reaches inside a requirement. A bullet carrying *because …* or *…, where the cost of
-being wrong lands on …* is a requirement plus an argument, and the argument belongs in the *so that*
-or nowhere.
+The same rule reaches inside a requirement — with one exception that is the whole point of having
+three kinds. A **user** or **system** requirement carrying *because …* is a requirement plus an
+argument, and that argument belongs in the *so that*, in a non-functional requirement, or nowhere.
+A **non-functional** requirement is where the argument is *supposed* to live: which failure is the
+more expensive one is a thing that holds whatever the design, it needs an id so a room can point at
+it, and the worked example's `ch1-2-nfr1` is exactly that shape.
 
 ## 7 · One altitude, chosen from the person before anything is written
 
@@ -200,7 +205,7 @@ table is a second copy that goes stale.
 | the row is | it answers with |
 |---|---|
 | `In`, from a step of this flow | that step's id |
-| `In`, at a sub-flow's entry | `parent` — the chapter this one drills into hands it in |
+| `In`, at a sub-flow's entry | `parent` — the chapter that drills into this one hands it in |
 | `In`, from outside any step | `authored`, `observed` or `generated` |
 | `Out` | `derived`, `authored`, `observed` or `generated` — how this node made it |
 
@@ -278,15 +283,23 @@ outside.
 
 Worth knowing before a review, because it says where the reading effort should go.
 
-**A checker settles**, and a chapter passing them is not correct but stops spending a reader's
-attention: an argument inside a requirement; a benefit clause naming the mechanism; a role that is
-not a role; sibling rows at two granularities; a `Required` column with one value; a title that
-disagrees with the parent's node text; a step drawn and never expanded, or expanded and never drawn.
+**A checker settles**: a step drawn and never expanded, or expanded and never drawn; a missing or
+misordered section, at either level; a requirement filed on one step and named for another; an id
+used twice; a series whose numbers do not sort; a row whose provenance names a step that never
+produced the thing; an `In` nothing upstream supplies; a chapter reporting its own build status,
+naming the test that proves it, or attributing a figure; a diagram that will not render. A chapter
+passing those is not correct — it has stopped spending a reader's attention on what a machine can
+see.
 
-**Only a reader catches**: a requirement that contradicts the diagram's order; a step announcing a
-choice made two steps earlier; a reading differenced against something not yet produced; an element
-one chapter writes and another never does. And altitude, which is why a word-by-word read has not
-been retired.
+**Only a reader catches**: an argument inside a requirement; a benefit clause naming the mechanism;
+a role that is not a role; sibling rows at two granularities; a `Required` column with one value; a
+title that disagrees with the parent's node text; a requirement that contradicts the diagram's
+order; a step announcing a choice made two steps earlier; an element one chapter writes and another
+never does. And altitude, which is why a word-by-word read has not been retired.
+
+Those first six sat in the *checker* list for a long time and nothing checked any of them, which is
+the more expensive way for a list like this to be wrong: a reviewer who believes a machine has
+already looked stops looking.
 
 **Only the owner settles**: where a step sits in their own sequence; whether a claim is worth
 making; whether publishing an apparatus publishes a working method.
@@ -295,5 +308,7 @@ The route off word-by-word review is not *write more carefully*. It is to repair
 read nothing, move the first bucket into the checker, and keep the reader for the second.
 
 **A check passing on a format it cannot parse is worse than no check.** If a check says `ok`,
-confirm it read something. The structural answer is one reader: the chapter is parsed once into an
-object every check is a pure function of, so no check can form its own opinion of what a row says.
+confirm it read something. The structural answer is one reader per pass: a chapter is parsed into an
+object, and every check over that object is a pure function of it, so no two of them can form
+different opinions of what a row says. Several passes still parse it separately — that is a debt,
+not a design, and it has produced a real disagreement at least once.

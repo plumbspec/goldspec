@@ -45,10 +45,16 @@ def test_the_example_actually_exercises_the_checks():
     report = check_spec_directory(EXAMPLE, conventions_for(EXAMPLE), cited_from=EXAMPLE.parent)
     checked = " ".join(report.checked)
 
-    # Five: the four nodes, plus the decision. A kinded subject is a subject — it carries an id, it
-    # can be cited, and `informs` is one of the markers the scan looks for — so leaving them out of
-    # what the spec DECLARES made every such citation unsatisfiable.
-    assert "5 subject(s)" in checked, f"the example stopped declaring its five subjects: {checked}"
+    # Eight: the four nodes, the decision, the parameter and the two open unknowns. Every one of
+    # the four kinds of subject the method defines, which is what makes this example worth
+    # checking — a citation to any of them has to resolve.
+    #
+    # It was five while the example DREW `ch1-P1` and declared it nowhere, against a tutorial
+    # saying a parameter lives at the foot of its node's block "and nowhere else"; and six while
+    # an open unknown — one of those four kinds — was refused as "declared nowhere" about a bullet
+    # sitting in plain sight. An example is read as the authority on every question the prose
+    # leaves open, so both taught the opposite of the page beside them.
+    assert "8 subject(s)" in checked, f"the example stopped declaring its eight subjects: {checked}"
     assert "chapter(s) in the node format, 4 node(s)" in checked, (
         f"the example no longer reads as four nodes, so the checks the tutorial says it exercises "
         f"are not being run over it: {checked}")

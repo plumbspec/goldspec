@@ -487,6 +487,26 @@ CASES: dict[str, dict[str, str]] = {
         "| ch1-2-inf1 | In | `order` | yes | ch1-1 |\n"
         "| ch1-2-inf2 | Out | `charge` | yes | observed |\n", "")),
     "node_kinded_id_not_namespaced": nodes_case(CLEAN.replace("`ch1-D1`", "`ch9-D1`")),
+    # A constraint the format puts ABOVE `## Nodes`, because it is genuinely not one step's. It
+    # was parsed only inside node blocks, so one written where the tutorial says to write it was
+    # declared nowhere and held to no namespace — `zz9-D9` there passed a clean spec.
+    "flow_level_kinded_not_namespaced": nodes_case(CLEAN.replace(
+        "## Nodes",
+        "**Decision `zz9-D9` — the round closes on a fixed date.** External.\n\n## Nodes", 1)),
+    "flow_level_kinded_restated_at_a_node": nodes_case(CLEAN.replace(
+        "## Nodes",
+        "**Decision `ch1-D1` — the round closes on a fixed date.** External.\n\n## Nodes", 1)),
+    # The separator between a requirement's id and its text is load-bearing, and its absence was
+    # silent: the bullet parsed as nothing, so every check over requirements went quiet on a line
+    # that looks exactly right.
+    "requirement_nothing_can_read": nodes_case(
+        CLEAN.replace("ch1-1-ur1 - ", "ch1-1-ur1: ", 1)),
+    # The same silent drop, one table over: a row with no id, or an `IO` outside the set, matched
+    # nothing and vanished before every downstream check.
+    "table_row_nothing_can_read": nodes_case(
+        CLEAN.replace("| ch1-1-inf1 | In |", "|  | In |", 1)),
+    "row_named_for_another_step": nodes_case(
+        CLEAN.replace("| ch1-2-inf1 |", "| ch1-1-inf9 |", 1)),
     "node_drawn_and_never_expanded": nodes_case(
         CLEAN.replace("    DONE([END]):::good",
                             "    REFUND[ch1-3 refund]:::process\n    DONE([END]):::good")
@@ -523,6 +543,11 @@ EXPECTED: dict[str, str] = {
     "node_expanded_twice": "is expanded more than once",
     "node_moves_nothing": "states no information at all",
     "node_kinded_id_not_namespaced": "#ch9-D1 is not namespaced to its chapter",
+    "flow_level_kinded_not_namespaced": "is stated for the whole flow and is not namespaced",
+    "flow_level_kinded_restated_at_a_node": "#ch1-D1 is stated more than once",
+    "requirement_nothing_can_read": "is written in a shape nothing reads",
+    "table_row_nothing_can_read": "has a table row nothing can read",
+    "row_named_for_another_step": "a row is filed on the step that moves it",
     "node_drawn_and_never_expanded": "is drawn in the flow and has no node block",
     "node_expanded_and_not_in_the_flow": "has a node block and is not in the flow",
     "chain_break": "which no earlier step produces",
@@ -805,3 +830,27 @@ def test_a_finding_in_a_flow_chapter_fails_the_command(tmp_path, capsys):
 
     assert code != 0 and "coupon" in out, \
         f"a finding in a converted chapter is not a fault:\n{out}"
+
+def test_the_command_says_what_it_read_and_not_only_what_was_wrong(tmp_path, capsys):
+    """`0 fault(s)` is the same sentence whether the gate read four nodes or found no chapters.
+
+    `Report.checked` says of itself that it matters as much as `problems` — a run that checked
+    nothing and found nothing is not a pass — and the command computed every one of those lines
+    and dropped them. So the observations three pages of documentation promise a reader ("the run
+    says what it saw and you decide") were never said, by the command those pages tell them to run.
+
+    On stderr, with the conventions and for the same reason: stdout is exactly the gate's problems
+    and their count (`vie7`), and context printed there would be a view stating something its
+    source does not.
+    """
+    spec = _build(tmp_path, "clean")
+    expected = _gate(spec)
+
+    code = main([str(spec)])
+    out, err = capsys.readouterr()
+
+    assert code == 0 and out.splitlines() == [f"0 fault(s) in {spec}"], (
+        f"stdout is no longer exactly the gate's report:\n{out}")
+    for line in expected.checked:
+        assert line in err, (
+            f"the command dropped what the gate said it read:\n  missing: {line}\n  said: {err}")

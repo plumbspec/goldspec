@@ -213,3 +213,212 @@ def test_an_unconverted_chapter_is_counted_and_never_failed(tmp_path):
 
     assert not any("node" in p.lower() and "format" in p.lower() for p in report.problems)
     assert any("0 of 1 chapter(s) in the node format" in c for c in report.checked)
+
+
+# ---- the start-and-end check reads the flow the tutorial teaches --------------------------------
+
+LEGEND = """
+    subgraph LEGEND["legend — shape carries the role"]
+        direction LR
+        LT([START / END]):::terminal
+        LA[action]:::process
+    end
+"""
+
+
+def test_a_chain_on_one_line_is_every_hop_of_it():
+    """`A --> B --> C` and one edge per line are the same graph, so they answer the same.
+
+    Reading only the first pair made `C` a node nothing points at and `B` a node nothing leaves,
+    which is a start and an end invented out of the notation. Every chapter the tutorial draws is
+    written this way, so the check was answering about a graph no chapter has.
+    """
+    from goldspec.flowcheck import terminals
+
+    nodes = "    A[a]\n    B[b]\n    C[c]\n"
+    assert terminals(nodes + "    A --> B --> C") == terminals(
+        nodes + "    A --> B\n    B --> C") == (["A"], ["C"])
+
+
+def test_a_node_drawn_and_never_connected_is_neither_a_start_nor_an_end():
+    """The legend this dialect asks every chapter to ship is nodes with no edges at all.
+
+    Counting a node as a start merely because nothing points at it made the legend seven starts
+    and seven ends, so a chapter carrying one satisfied the check whatever its flow did — a gate
+    that cannot fail. A start has a way out; an end is arrived at.
+    """
+    from goldspec.flowcheck import terminals
+
+    cycle = "    A[a]\n    B[b]\n    A --> B\n    B --> A"
+    assert terminals(cycle) == ([], [])
+    assert terminals(cycle + LEGEND) == ([], []), "the legend must not supply the terminals"
+
+
+def test_the_worked_example_begins_and_ends_where_it_is_drawn_to():
+    """The shipped chapter, read as a graph: one start, and both of its endings."""
+    from goldspec.flowcheck import terminals
+    from goldspec.nodes import mermaid_blocks
+
+    text = Path("docs/example/spec/diagrams/chapter-01-ordering.md").read_text(encoding="utf-8")
+    starts, ends = terminals("\n".join(mermaid_blocks(text)))
+    assert starts == ["START"]
+    assert sorted(ends) == ["DONE", "SHORT"]
+
+
+# ---- a constraint stated for the whole flow is still a subject ----------------------------------
+
+FLOW_LEVEL = CLEAN.replace(
+    "## Nodes",
+    "**Decision `ch1-D2` — the round closes on a fixed date.** External and restricting.\n"
+    "\n## Nodes", 1)
+
+
+def test_a_decision_stated_for_the_whole_flow_is_declared(tmp_path):
+    """The format provides for one above `## Nodes`, and nothing read it.
+
+    Kinded ids were parsed only inside node blocks, so a constraint written exactly where the
+    tutorial says to write it was declared nowhere — uncitable, and held to no namespace. It is
+    the placement the tutorial recommends for a constraint that is genuinely not one step's, so
+    the advice and the gate disagreed about whether the result was a subject at all.
+    """
+    chapter = read(_chapter(tmp_path, FLOW_LEVEL))
+    assert chapter.kinded == ("ch1-D2",), (
+        f"a flow-level decision is not read off the chapter: {chapter.kinded}")
+
+    from goldspec.specgate import declared_in_spec
+
+    spec = _spec(tmp_path / "corpus", FLOW_LEVEL)
+    declared = declared_in_spec(spec, Conventions())
+    assert "ch1-D2" in declared, (
+        f"the flow-level decision is not among what the spec declares, so a citation to it is "
+        f"unsatisfiable however the chapter is written: {declared}")
+
+
+def test_a_flow_level_decision_is_namespaced_to_its_chapter(tmp_path):
+    """`zz9-D9` between the diagram and `## Nodes` passed, on a spec with no other fault."""
+    stray = FLOW_LEVEL.replace("`ch1-D2`", "`zz9-D9`")
+    found = faults(read(_chapter(tmp_path, stray)), "ch1", {"ch1-1", "ch1-2"})
+    assert any("zz9-D9" in f and "namespaced" in f for f in found), found
+
+
+def test_one_number_series_covers_both_placements(tmp_path):
+    """"Flow-level and node-level decisions share one number series per chapter" — held, now."""
+    twice = FLOW_LEVEL.replace(
+        "#### Unknowns",
+        "#### Unknowns\n\n**Decision `ch1-D2` — the same id, at a node.** Restating.", 1)
+    found = faults(read(_chapter(tmp_path, twice)), "ch1", {"ch1-1", "ch1-2"})
+    assert any("ch1-D2" in f and "more than once" in f for f in found), found
+
+
+def test_a_requirement_bullet_nothing_can_read_is_named(tmp_path):
+    """The separator is load-bearing and its absence was silent.
+
+    `* ch1-2-ur1: the text` and `* ch1-2-ur1 — the text` parse as nothing, so the requirement is
+    not read at all: the ownership check and the duplicate check go quiet on a line that looks
+    exactly right, and nothing counts requirements, so there was no number to compare either.
+    That is the shape of failure this whole module is arranged to prevent, inside the parser.
+    """
+    # An em dash and an en dash now read the same as a hyphen, as they do in a `###` heading.
+    for at, separator in enumerate((":", "", ";")):
+        broken = CLEAN.replace("ch1-1-ur1 - ", f"ch1-1-ur1{separator} ", 1)
+        where = tmp_path / f"case{at}"
+        where.mkdir()
+        found = faults(read(_chapter(where, broken)), "ch1", {"ch1-1", "ch1-2"})
+        assert any("ch1-1-ur1" in f and "nothing reads" in f for f in found), (
+            f"a requirement written with {separator!r} between the id and the text was read as "
+            f"nothing and reported as nothing: {found}")
+
+
+def test_the_dashes_a_heading_accepts_a_requirement_accepts(tmp_path):
+    """`:586` blesses `-`, `\u2013` and `\u2014` for a node heading, and a reader carries the habit."""
+    for at, separator in enumerate(("-", "\u2013", "\u2014")):
+        where = tmp_path / f"dash{at}"
+        where.mkdir()
+        chapter = read(_chapter(where, CLEAN.replace("ch1-1-ur1 - ", f"ch1-1-ur1 {separator} ", 1)))
+        assert not any(node.malformed for node in chapter.nodes), (
+            f"a requirement separated by {separator!r} was read as unreadable")
+
+
+def test_a_row_named_for_another_step_is_named(tmp_path):
+    """The rule a requirement is already held to, and a row was not — with nothing saying which."""
+    misfiled = CLEAN.replace("| ch1-2-inf1 |", "| ch1-1-inf9 |", 1)
+    found = faults(read(_chapter(tmp_path, misfiled)), "ch1", {"ch1-1", "ch1-2"})
+    assert any("ch1-1-inf9" in f and "filed on the step that moves it" in f for f in found), found
+
+
+def test_the_clean_fixture_has_no_unreadable_requirement(tmp_path):
+    """The check is a difference, so the correct shape must stay silent."""
+    chapter = read(_chapter(tmp_path, CLEAN))
+    assert not any(node.malformed for node in chapter.nodes), (
+        "the requirement shape the documentation teaches is being reported as unreadable")
+
+
+def test_a_table_row_nothing_can_read_is_named(tmp_path):
+    """A row the five-column parser could not read used to vanish before every check.
+
+    An unidentified required input, from a step that does not exist, passed a clean run — the row
+    matched nothing, so the element it moves and the provenance it claims were never in the data
+    any check saw. `Input` and `Output`, which is the older shape's own spelling, disappeared the
+    same way rather than being refused.
+    """
+    for at, broken in enumerate((
+            CLEAN.replace("| ch1-1-inf1 | In |", "|  | In |", 1),
+            CLEAN.replace("| ch1-1-inf1 | In |", "| ch1-1-inf1 | Input |", 1))):
+        where = tmp_path / f"row{at}"
+        where.mkdir()
+        found = faults(read(_chapter(where, broken)), "ch1", {"ch1-1", "ch1-2"})
+        assert any("nothing can read" in f for f in found), (
+            f"a row nothing could parse was dropped in silence rather than named: {found}")
+
+
+def test_a_diagram_is_indented_however_its_author_indents_it(tmp_path):
+    """`^\\s{4}` meant exactly four whitespace characters, and mermaid does not care.
+
+    At two, six or eight spaces the var-to-id map came back empty — so `chain`, `provenance`'s
+    reachability half and `unconsumed` all went silent together, while every node in the chapter
+    was reported as not being in the flow. Four faults naming the wrong cause, and three real
+    gates off, over an indent nothing documented because nothing knew it mattered.
+    """
+    from goldspec.nodes import read_flow
+
+    for spaces in (2, 4, 6, 8):
+        body = "\n".join(" " * spaces + line for line in (
+            "A[<b>ch1-1</b> take the order]:::process",
+            "B[<b>ch1-2</b> charge once]:::process",
+            "A --> B"))
+        _, var2id, _ = read_flow(f"```mermaid\nflowchart TD\n{body}\n```")
+        assert var2id == {"A": "ch1-1", "B": "ch1-2"}, (
+            f"a diagram indented by {spaces} reads as naming no nodes: {var2id}")
+
+
+def test_a_heading_quoted_in_a_code_block_is_not_a_section(tmp_path):
+    """The section scan re-read the file raw, so a chapter could not quote a `##` heading.
+
+    It is the concrete cost of a second observer: this page promises exactly one reader, and the
+    one that went back to the source had its own opinion of what a `##` line is.
+    """
+    quoting = CLEAN + "\n\n## Working notes\n\n```\n## Input → process → output\n```\n"
+    found = faults(read(_chapter(tmp_path, quoting)), "ch1", {"ch1-1", "ch1-2"})
+    assert not any("sections are" in f for f in found), (
+        f"a `##` heading inside a fenced code block was read as a section: {found}")
+
+
+def test_working_notes_are_exempt_only_where_they_belong(tmp_path):
+    """The exemption is for a TRAILING section that says what it is, and placement was unchecked.
+
+    Two passages say it goes last and nothing held it there, so a chapter could open with its
+    working notes and pass. The heading keeps its own wording after the name — the corpus writes
+    `## Working notes — not part of the chapter` — which is the whole reason ignoring it is honest
+    rather than lenient, so the name is a prefix and the position is the rule.
+    """
+    ok, bad = tmp_path / "ok", tmp_path / "bad"
+    ok.mkdir(); bad.mkdir()
+    trailing = CLEAN + "\n\n## Working notes — not part of the chapter\n\nstill thinking.\n"
+    assert not [f for f in faults(read(_chapter(ok, trailing)), "ch1",
+                                  {"ch1-1", "ch1-2"}) if "sections are" in f], (
+        "a trailing working-notes section is not exempt, and the corpus writes one")
+
+    leading = CLEAN.replace("## Nodes", "## Working notes — first?\n\nnope.\n\n## Nodes", 1)
+    assert [f for f in faults(read(_chapter(bad, leading)), "ch1",
+                              {"ch1-1", "ch1-2"}) if "sections are" in f], (
+        "working notes above the chapter's own sections passed the section check")

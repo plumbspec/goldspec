@@ -23,6 +23,15 @@ from pathlib import Path
 #: fault it was looking for.
 _OPENERS = {"[": "]", "{": "}"}
 
+#: The parameter shape, `P1>"a label"]`, matched at the head of a node definition.
+#:
+#: `>` cannot go in `_OPENERS`: it is in every `<b>`, `<br/>` and `-->` on the line, and matching
+#: it produced a false positive on almost every diagram here. So the shape is found where it is
+#: unambiguous — a node name at the start of a line, then `>` — which is the only place it can
+#: legally appear. Without this the one shape the tutorial singles out as "the one shape where
+#: quoting is not optional" was the one shape never scanned.
+_PARAMETER = re.compile(r"^\s*[A-Za-z_]\w*>(?!=)(.*?)\]\s*(?::::\w+)?\s*$")
+
 #: Characters an *unquoted* label cannot contain. Mermaid reads each as the start of another shape,
 #: so the parse dies and takes the **whole diagram** with it — the same total, silent failure as a
 #: bare quote, which is why they belong in the same check rather than a new one.
@@ -35,6 +44,11 @@ _OPENERS = {"[": "]", "{": "}"}
 _UNQUOTABLE = '"([{'
 _CLASSDEF = re.compile(r"^\s*classDef\s+(\S+)\s+(.*)$")
 _CLASS_USE = re.compile(r":::(\w+)")
+
+#: Classes for a node that is attached to the flow rather than part of it — a value
+#: to discover, a question nobody has answered. Terminal by construction, so neither
+#: is an ending the start-and-end check should accept.
+_HANGS_OFF = {"unknown", "parameter"}
 
 
 def faults(paths) -> list[str]:
@@ -101,6 +115,11 @@ def _block_faults(path: Path, start: int, block: list[str]) -> list[str]:
         where = f"{path.name}:{start + offset}"
 
         bare = _bare_delimiter(line)
+        if not bare:
+            shaped = _PARAMETER.match(line)
+            if shaped and not shaped.group(1).startswith('"'):
+                found_in = [c for c in _UNQUOTABLE if c in shaped.group(1)]
+                bare = found_in[0] if found_in else ""
         if bare:
             found.append(f"{where}: a bare `{bare}` inside an unquoted label — quote the label or "
                          f"the whole diagram fails to render: {line.strip()[:70]}")
@@ -125,26 +144,54 @@ _NODE = re.compile(r"^\s+([A-Za-z_][A-Za-z0-9_]*)\s*(\[\[|\(\[|\[|\{|>)(.*?)(\]\
 #: A node may carry its shape inline on either side of an edge — `A[a] --> B[b]` is as valid as
 #: naming both above and writing `A --> B`. Skipping the shape is what lets both read the same.
 _SHAPE = r"(?:\[\[.*?\]\]|\(\[.*?\]\)|\[.*?\]|\{.*?\}|>.*?\])?"
-_EDGE = re.compile(
-    rf"^\s+([A-Za-z_][A-Za-z0-9_]*){_SHAPE}\s*[-.=]+[^>\n]*>\s*(?:\|[^|]*\|\s*)?"
-    rf"([A-Za-z_][A-Za-z0-9_]*)", re.M)
+#: One hop of a chain: an arrow, an optional label, and the node on the far side.
+#: Written as a scan rather than a match of the whole line, because `A --> B --> C` is one line
+#: carrying two edges and reading only the first is how `C` came to look like a node nothing points
+#: at. Every chapter the tutorial teaches is drawn that way, so the start-and-end check was
+#: answering about a graph the chapter does not have.
+_HOP = re.compile(
+    rf"[-.=]+[^>\n]*>\s*(?:\|[^|]*\|\s*)?([A-Za-z_][A-Za-z0-9_]*){_SHAPE}")
+#: The node a chain starts from, at the head of the line.
+_HEAD = re.compile(rf"^\s+([A-Za-z_][A-Za-z0-9_]*){_SHAPE}\s*(?=[-.=]+[^>\n]*>)", re.M)
+
+
+def _edges(source: str) -> list:
+    """Every ``(from, to)`` the diagram draws, including each hop of a chain."""
+    found = []
+    for line in source.splitlines():
+        head = _HEAD.match(line)
+        if not head:
+            continue
+        previous = head.group(1)
+        for hop in _HOP.finditer(line, head.end()):
+            found.append((previous, hop.group(1)))
+            previous = hop.group(1)
+    return found
 
 
 def terminals(source: str) -> tuple[list[str], list[str]]:
     """The nodes a flow begins at and ends at, derived from the edges rather than declared.
 
-    A start is a node nothing points at; an end is a node that points at nothing. Open unknowns are
-    excluded from both — they hang off the flow deliberately and are terminal by construction, so
-    counting one as an ending would let a flow satisfy this check by having an unanswered question
-    in it, which is the opposite of what the check is for.
+    A start is a node with a way out and nothing pointing at it; an end is a node something
+    reaches and nothing leaves. **Both halves are load-bearing.** Asking only *is it pointed at*
+    counts every node that is drawn and never connected — a legend, which this dialect asks every
+    chapter to ship, is seven of them — so the check had a start and an end on any chapter
+    carrying one, whatever its flow actually did.
+
+    Unknowns and parameters are excluded from both. They hang off the flow deliberately and are
+    terminal by construction, so counting one as an ending would let a flow satisfy this check by
+    having an unanswered question in it, which is the opposite of what the check is for.
     """
     nodes = {m.group(1): (m.group(5) or "")[3:] for m in _NODE.finditer(source)}
-    for m in _EDGE.finditer(source):
-        nodes.setdefault(m.group(1), "")
-        nodes.setdefault(m.group(2), "")
-    sources = {m.group(1) for m in _EDGE.finditer(source)}
-    targets = {m.group(2) for m in _EDGE.finditer(source)}
+    edges = _edges(source)
+    for a, b in edges:
+        nodes.setdefault(a, "")
+        nodes.setdefault(b, "")
+    sources = {a for a, _ in edges}
+    targets = {b for _, b in edges}
 
-    starts = [n for n, cls in nodes.items() if n not in targets and cls != "unknown"]
-    ends = [n for n, cls in nodes.items() if n not in sources and cls != "unknown"]
+    starts = [n for n, cls in nodes.items()
+              if n in sources and n not in targets and cls not in _HANGS_OFF]
+    ends = [n for n, cls in nodes.items()
+            if n in targets and n not in sources and cls not in _HANGS_OFF]
     return starts, ends

@@ -1,6 +1,6 @@
 # Chapter 1 — a customer places an order and knows it was taken
 
-**Last updated** 2026-09-15 v1
+**Last updated** 2026-09-23 v2
 
 > **As a customer I want to place an order and be told it was accepted, so that I know I will be
 > charged for something that is actually coming.**
@@ -107,8 +107,14 @@ flowchart TD
     nothing and spends the refund, the apology and the trust to put it back
 
 #### Unknowns
-  * ch1-2-u1 - how long a reservation is held is not measured; too short and a slow card releases
-    stock somebody has been promised, too long and a browsing customer holds stock nobody can sell
+  * ch1-2-u1 - whether a partly available order is offered back as a smaller order or refused
+    whole is undecided; both are defensible, and the answer is a choice about what this shop is
+    rather than a number anybody can measure
+
+**Parameter `ch1-P1` — how long a reservation is held.** The model is available today: the
+distribution of reservation-to-charge times bounds it from below, because a reservation shorter
+than a slow card releases stock somebody has been promised; the rate at which reserved stock is
+abandoned unbought bounds it from above.
 
 ---
 
@@ -179,8 +185,5 @@ may assume same-day settlement. It is not this shop's to negotiate.
 | Basket | What a customer chose, before it is an order. It has no reference and the shop owes nothing on it |
 | Order | A basket the shop has accepted responsibility for. It has a reference from the moment it exists |
 | Short | A line the shop cannot fill in the quantity asked for. Not the same as *out of stock*, which is a property of the item rather than of this order |
-| Provenance | Where an input came from, or how an output was made |
-| Authored | Written by a person. An input nothing produces, or an output somebody typed |
-| Derived | Computed by this step from what it took in |
-| Observed | Read off a run, or the world as it stands |
-| Generated | Made by a tool rather than by a person, and not recomputable |
+| Reservation | Stock held against one order between the availability check and the charge. It is not a sale, and it ends whichever way the charge goes |
+| Reference | The handle an order carries from the moment it exists. What a customer quotes and what a charge is keyed by |

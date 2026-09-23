@@ -2,9 +2,16 @@
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.dynamic]
+version = {attr = "goldspec.BASE_VERSION"}
+
 [project]
 name = "goldspec"
-version = "0.1.1"
+# Read from `goldspec.BASE_VERSION`, never typed here. It was typed here, and the constant beside
+# it called itself "the one authored version" while being the second — so a bump to this file left
+# the command still reporting the old number, which is how two of them stay apart without anybody
+# seeing it. plumb's own pyproject records the same fault and the same fix.
+dynamic = ["version"]
 description = "The gold-spec methodology and its gates — optional, and unknown to plumb."
 license = "Apache-2.0"
 license-files = ["LICENSE"]

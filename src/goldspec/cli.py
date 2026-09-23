@@ -54,6 +54,19 @@ def main(argv: list[str] | None = None) -> int:
           file=sys.stderr)
 
     report = check_spec_directory(spec, conv, cited_from=spec.parent)
+
+    # What the run actually read, on stderr beside the conventions and for the same reason: stdout
+    # is exactly the gate's problems and their count (`vie7`), and a line of context there would be
+    # a view stating something its source does not.
+    #
+    # Printed at all because `Report.checked` says of itself that it matters as much as `problems`
+    # — a run that checked nothing and found nothing is not a pass — and the command had been
+    # computing every one of these lines and dropping them. So `0 fault(s)` was the whole output
+    # whether the gate had read seven chapters or none, and the observations three pages of
+    # documentation promise a reader ("the run says what it saw and you decide") were never said.
+    for line in report.checked:
+        print(f"goldspec: {line}", file=sys.stderr)
+
     # Read straight off the report, never through `getattr(report, ..., default)`. This line spent
     # its whole life as `getattr(report, "faults", None) or []` — an attribute `Report` has never
     # had — so every run printed no faults and exited 0 whatever the spec contained. The guard is

@@ -1,10 +1,14 @@
 # goldspec
 
-The **gold-spec methodology** — process flows with IPO, data definitions, stories, decisions and
-unknowns, and the gates that keep them honest.
+The **gold-spec methodology** — a process flow whose every step is a user story, carrying the
+information it moves, the requirements that hold it and the questions still open, and the gates that
+keep all of it honest.
 
 **New here?** [Getting started](docs/getting-started.md) walks one complete chapter part by part and
 gets the gate green. [All the documentation](docs/README.md).
+
+**Already using it?** [CHANGELOG.md](CHANGELOG.md) says what each release changed and whether
+taking it asks anything of you.
 
 ## This is not plumb, and nothing plumb ships imports it
 
@@ -54,7 +58,8 @@ Adopting goldspec means adopting the **shape** — a subject is a trace row, pla
 never our particular strings. Ids namespaced `REQ` or `sh`, flows in a directory called something
 else, chapters named to suit you: all of it is yours, and the gates check it just the same.
 
-Say so in a `goldspec.toml`, beside your chapters or beside your spec directory:
+Say so in a `goldspec.toml`, **inside your spec directory or beside it** — those two places and no
+other, so a file that is being ignored is a file in a place you can see is wrong:
 
 ```toml
 [conventions]
@@ -67,9 +72,16 @@ siblings = ["../other/spec"]      # more of this corpus, read for what it define
 **A chapter is held to the shape it is written in.** Written as a flow, its information lives with
 the node that moves it — a `## Nodes` section where each node carries its story and states what it
 takes and leaves, each row saying where it came from. Written in the older shape, with one
-`## Input → process → output` and one `## Data definitions` per chapter, it is read that way and
-**counted rather than failed**. So a corpus converts a chapter at a time and neither half is failed
-for being the half it is; there is no flag to set, and none to remember to unset.
+`## Input → process → output` and one `## Data definitions` per chapter, it is **counted and not
+held to the node format's checks**. So a corpus converts a chapter at a time and an unconverted
+chapter is not failed for the shape it is in; there is no flag to set, and none to remember to
+unset.
+
+Two limits on that, because they are real and a reader should meet them here rather than in a
+run. **An unconverted chapter declares no subjects**, so a test citing one is reported as citing
+something nobody wrote down, and **a spec in which nothing is converted fails** — the gate finds no
+subjects at all, which it refuses rather than calls a pass. Convert the chapters your tests cite
+first and the rest follow at their own pace.
 
 Every key is optional and the defaults are our habits, so a project that took them writes no file
 at all. **The command reads it and so does the library** — `conventions_for(spec)` is what both
@@ -78,9 +90,13 @@ see each other, which is the defect this whole method exists to remove.
 
 Two locations, in that order, and deliberately not a search up to the filesystem root: an upward
 search finds a file you did not write, in a directory you may not own, and reports its conventions
-as yours. Put the file beside your chapters if one repository holds more than one spec — a file at
-the root is found for every spec directory beneath it, which is right for a project with one spec
-and wrong for a project with two.
+as yours. Put the file *inside* the spec directory if one repository holds more than one spec — a
+file beside it is found for every spec directory next to it, which is right for a project with one
+spec and wrong for a project with two.
+
+A file anywhere else is not read and nothing says so, because nothing can: a directory with no
+`goldspec.toml` in it and a project that took the defaults are the same thing. The run's first line
+is what tells you which happened.
 
 Every run says which conventions it judged by, and where they came from. That line is worth reading
 when a fault surprises you: every message this gate emits is phrased as a verdict on your spec, and

@@ -343,3 +343,68 @@ def test_the_dataclass_defaults_are_the_module_constants(tmp_path):
     assert Conventions().namespace == conventions.NAMESPACE
     assert Conventions().flow_dir == conventions.FLOW_DIR
     assert Conventions().flow_glob == conventions.FLOW_GLOB
+
+
+def test_a_sibling_spec_is_actually_read(tmp_path):
+    """`siblings` was parsed, validated, resolved — and read by nothing.
+
+    So `siblings` in a `goldspec.toml` and `--sibling` on the command line both did exactly
+    nothing, while the line the run prints said an element was taken by nothing "in this chapter
+    **or anywhere linked**" — asserting a corpus-wide search on a run that had linked nothing. A
+    check that says out loud it looked is the worst one to have looking nowhere.
+    """
+    from goldspec import check_spec_directory
+    from goldspec.conventions import Conventions
+
+    here = Path(__file__).resolve().parent.parent / "docs/example/spec/diagrams"
+    base = (here / "chapter-01-ordering.md").read_text(encoding="utf-8")
+
+    mine = tmp_path / "mine" / "diagrams"
+    mine.mkdir(parents=True)
+    (mine / "chapter-01-ordering.md").write_text(base, encoding="utf-8")
+
+    theirs = tmp_path / "theirs" / "diagrams"
+    theirs.mkdir(parents=True)
+    # A neighbour that plainly consumes what chapter 1 leaves with.
+    (theirs / "chapter-09-fulfilment.md").write_text(
+        base.replace("ch1", "ch9").replace("Chapter 1", "Chapter 9")
+            .replace("| ch9-1-inf1 | In | `basket` | yes | authored |",
+                     "| ch9-1-inf1 | In | `confirmation` | yes | authored |"),
+        encoding="utf-8")
+
+    def observations(conv):
+        report = check_spec_directory(tmp_path / "mine", conv)
+        return [line for line in report.checked if "leaves with confirmation" in line]
+
+    assert observations(Conventions()), (
+        "the fixture is wrong — `confirmation` should read as taken by nobody with no sibling")
+    assert not observations(Conventions(siblings=(tmp_path / "theirs",))), (
+        "the sibling's chapter consumes `confirmation` and the run still says nothing anywhere "
+        "linked takes it — `siblings` is not being read")
+
+
+def test_the_padding_check_runs_under_a_projects_own_conventions(tmp_path):
+    """`padded` took its id prefix from the FILENAME, so it was dead for a renamed flow.
+
+    Handed `story` for a project whose flows are `story-*.md`, it found no series under that
+    prefix, compared nothing, and passed — silently, for exactly the population the conventions
+    chapter is written for.
+    """
+    from goldspec import check_spec_directory
+    from goldspec.conventions import Conventions
+
+    here = Path(__file__).resolve().parent.parent / "docs/example/spec/diagrams"
+    base = (here / "chapter-01-ordering.md").read_text(encoding="utf-8")
+    mixed = base.replace("ch1-1-ur2 -", "ch1-1-ur02 -")
+
+    def faults_for(conv, name):
+        flows = tmp_path / name / conv.flow_dir
+        flows.mkdir(parents=True)
+        (flows / name).write_text(mixed.replace("ch1", conv.namespace + "1"), encoding="utf-8")
+        return [p for p in check_spec_directory(tmp_path / name, conv).problems if "padded" in p]
+
+    assert faults_for(Conventions(), "chapter-01-ordering.md"), "the fixture no longer mixes widths"
+    assert faults_for(Conventions(namespace="ord", flow_glob="story-*.md"),
+                      "story-01-ordering.md"), (
+        "the same mixed-width series passes under a custom flow glob — the padding check is "
+        "looking for ids under a prefix no project id starts with")

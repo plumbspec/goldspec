@@ -100,7 +100,9 @@ class Conventions:
 def find_config(spec: Path) -> Path | None:
     """Where a project's ``goldspec.toml`` is, or ``None``.
 
-    Two places, in order: beside the chapters, then beside the spec directory. Deliberately not a
+    Two places, in order: inside the spec directory, then beside it. Not *beside the chapters* —
+    a file in ``spec/diagrams/`` is never looked at, which said aloud is the point: two locations
+    can be checked by eye, and a third that nearly works is worse than either. Deliberately not a
     walk to the filesystem root — an upward search finds a file the adopter did not write, in a
     parent directory they may not own, and reports its conventions as theirs. Two locations can be
     stated in a sentence and checked by eye, which is what a first-contact tool owes.
