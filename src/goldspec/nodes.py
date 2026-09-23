@@ -92,7 +92,12 @@ _NODE = re.compile(r"^###\s+`?([A-Za-z]+\d[\w.\-]*\d|[A-Za-z]+\d)`?\s*[·—-]?\
 #: `[^*]*` is what pins it: the id has to sit inside the *first* bold run of the line, before any
 #: other emphasis, which is the shape both a parameter and a decision are written in and the shape a
 #: sentence about somebody else's unknown never has.
-_KINDED = re.compile(r"^\*\*[^*]*`([A-Za-z]+\d+(?:-\d+)*-([PUD])\d+)`", re.M)
+#: The chapter number is OPTIONAL. `[A-Za-z]+\d+` assumed every chapter is numbered — true of
+#: `chapter-01-ordering.md` giving `ch1`, and false of a corpus that names its flows by sigil, where
+#: the prefix is `hol` or `snd` and the nodes are `hol1`, `snd1`. A decision written `snd-D1`, which
+#: is the only spelling consistent with those nodes, matched nothing: it was declared nowhere, held
+#: to no namespace, and the run reported no fault — the gate could not see it to refuse it.
+_KINDED = re.compile(r"^\*\*[^*]*`([A-Za-z]+\d*(?:-\d+)*-([PUD])\d+)`", re.M)
 
 #: The node's story — the blockquote under its heading, one or more lines of `> `.
 _STORY = re.compile(r"^> (.+(?:\n> .+)*)", re.M)

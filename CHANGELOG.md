@@ -71,6 +71,13 @@ to ship is seven of those, so any chapter carrying one passed whatever its flow 
 read at all: it could not be cited, and it was held to no namespace. It is a subject now, sharing
 one number series with the ones at a node.
 
+### A chapter named by its sigil can declare a decision
+
+`ch1-D1` read and `snd-D1` did not: the pattern required a number after the sigil, which is true of
+`chapter-01-ordering.md` and false of a corpus that names its flows `hol-…` or `snd-…` and numbers
+its nodes `hol1`, `snd1`. A decision spelled the only way consistent with those nodes was declared
+nowhere, held to no namespace, and reported as no fault — the gate could not see it to refuse it.
+
 ### Smaller things
 
 - `goldspec --version` answers with the version you installed, where it could answer with an older

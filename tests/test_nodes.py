@@ -422,3 +422,32 @@ def test_working_notes_are_exempt_only_where_they_belong(tmp_path):
     assert [f for f in faults(read(_chapter(bad, leading)), "ch1",
                               {"ch1-1", "ch1-2"}) if "sections are" in f], (
         "working notes above the chapter's own sections passed the section check")
+
+
+def test_a_chapter_named_by_its_sigil_can_declare_a_decision(tmp_path):
+    """A corpus that names its flows by sigil has a prefix with no number in it.
+
+    `chapter-01-ordering.md` gives `ch1`, so `ch1-D1` reads. A flow named `snd-send-what-a-run-
+    produced.md` gives `snd`, its nodes are `snd1`..`snd4`, and the only spelling consistent with
+    those is `snd-D1` — which matched nothing. It was declared nowhere and held to no namespace,
+    and the run reported no fault, because the gate could not see it in order to refuse it.
+    """
+    from goldspec.specgate import declared_in_spec
+
+    sigil = CLEAN.replace("ch1-", "snd").replace("### snd1 ", "### snd1 ").replace(
+        "## Nodes",
+        "**Decision `snd-D1` — the window closes at 02:00.** External and restricting.\n\n## Nodes",
+        1)
+    chapter = read(_chapter(tmp_path, sigil))
+    assert chapter.kinded == ("snd-D1",), (
+        f"a decision in a chapter whose prefix carries no number is invisible: {chapter.kinded}")
+
+
+def test_the_corpus_this_ships_with_still_declares_its_own_kinded_ids(tmp_path):
+    """The numbered spelling is the common one, and widening the pattern must not lose it."""
+    from goldspec.nodes import _KINDED
+
+    assert [m[0] for m in _KINDED.findall("**Decision `ch1-D1` — the window closes.**")] == ["ch1-D1"]
+    assert [m[0] for m in _KINDED.findall("**Parameter `dev07-6-P1` — a window.**")] == ["dev07-6-P1"]
+    # A sentence citing somebody else's subject is still not a declaration.
+    assert _KINDED.findall("The argument turns on **the** other chapter's `ch3-U1`, which is open.") == []
