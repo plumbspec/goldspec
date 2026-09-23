@@ -77,3 +77,22 @@ def test_the_runner_the_package_asks_for_can_be_installed_at_the_floor():
     if floor() < (3, 10):
         assert int(pin.group(1)) < 9, (
             f"pytest>={pin.group(1)} cannot be installed on Python {floor()[0]}.{floor()[1]}")
+
+
+def test_every_vendored_licence_is_declared_as_package_data():
+    """Code that ships under someone else's licence ships with it (`ado4`).
+
+    `packages.find` collects modules and nothing else, so the notice beside a vendored parser is
+    left out of the wheel while the code it covers goes in — a licence fault rather than a missing
+    convenience, and invisible from the zipapp, which carries whole directories and was never
+    short of it.
+    """
+    declared = (SRC.parent / "pyproject.toml").read_text(encoding="utf-8")
+    missing = []
+    for licence in sorted(SRC.rglob("_vendor/*/LICENSE")):
+        owner = ".".join(licence.parent.relative_to(SRC).parts)
+        if f'"{owner}"' not in declared or "LICENSE" not in declared:
+            missing.append(owner)
+    assert missing == [], (
+        f"vendored under a licence the wheel would not carry: {missing} — name the package "
+        f"under [tool.setuptools.package-data] with LICENSE among its files")
