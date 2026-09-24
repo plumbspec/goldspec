@@ -95,6 +95,18 @@ Reported by a project whose corpus of 34 nodes came back as declaring nothing: t
 been corrected and `flow_glob` left at its default, so the glob matched no file and the verdict
 read as being about their spec.
 
+### One dotted-name rule, read the same way by both checks
+
+A name and its parts relate one way per question: a producer of the whole supplies a taker of a
+part, and a taker of a part reads a producer of the whole. Neither reverses.
+
+`cross_flow` had it backwards in one direction — any chapter consuming `order` made every `order.*`
+a sub-flow produced look wanted, so a parent was told to declare a transit because an unrelated
+flow elsewhere took the whole. The fault landed in a chapter whose author had not touched it.
+
+The rule was implemented twice and written down nowhere, which is how the two copies came to
+disagree. It is `spe5-sr7` now.
+
 ### Smaller things
 
 - `goldspec --version` answers with the version you installed, where it could answer with an older

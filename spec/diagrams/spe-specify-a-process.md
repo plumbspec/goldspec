@@ -1,6 +1,6 @@
 # spe · specify a process
 
-**Last updated** 2026-09-15 v3
+**Last updated** 2026-09-24 v4
 
 What somebody who owns a process does to write it down, so that what they decided can be argued
 with and what they left out can be found. Exits to [cus · keep the corpus](cus-keep-the-corpus.md),
@@ -226,11 +226,20 @@ flowchart TD
   * spe5-sr4 - a step states its constraints under the five headings, in one order; a heading
     dropped or moved is a fault
   * spe5-sr5 - a requirement is named for the step it is stated under, and an id is stated once
+  * spe5-sr7 - a name and its dotted parts are one thing at two grains, and the relation runs one
+    way per question: a step producing the whole SUPPLIES a step taking a part, and a step taking a
+    part READS a step producing the whole. Neither reverses — producing a part does not supply a
+    demand for the whole, and taking the whole is not a demand for any particular part
 
 #### Non-Functional Requirements
   * spe5-nfr1 - a gate reports what it can decide and never what it would have to judge
   * spe5-nfr2 - evidence is never authored — asserting a document says something proves only
     that somebody wrote it
+  * spe5-nfr3 - the direction is the whole of the rule, and stating it nowhere let two checks
+    implement it oppositely: one held that a consumed part justifies producing the whole, the other
+    that consuming the whole counts as consuming every part. They answered the same question about
+    one element with different verdicts, and the fault surfaced in a chapter whose author had not
+    touched it
 
 #### Unknowns
   * spe5-u1 - a stated constraint and the code that enforces it can still drift, and nothing

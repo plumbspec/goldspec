@@ -451,3 +451,121 @@ def test_the_corpus_this_ships_with_still_declares_its_own_kinded_ids(tmp_path):
     assert [m[0] for m in _KINDED.findall("**Parameter `dev07-6-P1` — a window.**")] == ["dev07-6-P1"]
     # A sentence citing somebody else's subject is still not a declaration.
     assert _KINDED.findall("The argument turns on **the** other chapter's `ch3-U1`, which is open.") == []
+
+
+# ---- the dotted-name rule runs one way per question (`spe5-sr7`) --------------------------------
+
+PARENT = """# Chapter 1 — a customer places an order
+
+**Last updated** 2026-09-15 v1
+
+> **As a customer I want to place an order, so that I get the thing.**
+
+```mermaid
+flowchart TD
+    START([START]):::terminal
+    TAKE[ch1-1 take the order]:::process
+    SUB[[ch1-2 assess it]]:::subroutine
+    DONE([END]):::good
+    START --> TAKE --> SUB --> DONE
+    classDef terminal fill:#eee,stroke:#555,color:#000;
+    classDef process fill:#eef,stroke:#27d,color:#000;
+    classDef subroutine fill:#eef,stroke:#27d,color:#000;
+    classDef good fill:#efe,stroke:#0a0,color:#000;
+```
+
+## Nodes
+
+### ch1-1 · take the order
+
+> **As a customer I want my order recorded, so that nothing is reconstructed later.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| ch1-1-inf1 | In | `basket` | yes | authored |
+| ch1-1-inf2 | Out | `order` | yes | derived |
+
+#### User Requirements
+  * ch1-1-ur1 - the order records what was chosen
+#### System Requirements
+#### Non-Functional Requirements
+#### Unknowns
+
+---
+
+### ch1-2 · assess it
+
+> **As a customer I want the order assessed, so that I am told before my card is touched.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| ch1-2-inf1 | In | `order` | yes | ch1-1 |
+| ch1-2-inf2 | Out | `verdict` | yes | derived |
+
+#### User Requirements
+  * ch1-2-ur1 - the assessment is made from the order
+#### System Requirements
+#### Non-Functional Requirements
+#### Unknowns
+
+## Glossary
+
+| Term | Meaning |
+|---|---|
+| Order | A basket the shop accepted |
+"""
+
+CHILD = PARENT.replace("# Chapter 1 — a customer places an order",
+                       "# Chapter 1.2 — assessing an order") \
+              .replace("ch1-1", "ch1-2-1").replace("ch1-2 ·", "ch1-2-2 ·") \
+              .replace("ch1-2-inf", "ch1-2-2-inf").replace("ch1-2-ur", "ch1-2-2-ur") \
+              .replace("SUB[[ch1-2 assess it]]:::subroutine", "SUB[ch1-2-2 grade it]:::process") \
+              .replace("`verdict`", "`order.grade`")
+
+
+def _corpus(root, parent_text, neighbour_consumes):
+    """A parent with a sub-flow, its child, and a neighbouring chapter that consumes something."""
+    flows = root / "diagrams"
+    flows.mkdir(parents=True)
+    (flows / "chapter-01-ordering.md").write_text(parent_text, encoding="utf-8")
+    (flows / "chapter-01.2-assessing.md").write_text(CHILD, encoding="utf-8")
+    (flows / "chapter-09-elsewhere.md").write_text(
+        PARENT.replace("# Chapter 1 —", "# Chapter 9 —").replace("ch1-", "ch9-")
+              .replace("SUB[[ch9-2 assess it]]:::subroutine", "SUB[ch9-2 assess it]:::process")
+              .replace("| ch9-1-inf1 | In | `basket` | yes | authored |",
+                       f"| ch9-1-inf1 | In | `{neighbour_consumes}` | yes | authored |"),
+        encoding="utf-8")
+    return root
+
+
+def test_taking_the_whole_elsewhere_is_not_a_demand_for_a_part(tmp_path):
+    """`spe5-sr7`. A neighbour consuming `order` does not make `order.grade` need declaring.
+
+    This read the rule backwards, so any chapter anywhere taking `order` made every `order.*` a
+    child produced look wanted — and a parent was told to declare something because an unrelated
+    flow took the whole. The fault surfaced in a file whose author had not touched it.
+    """
+    from goldspec.review import cross_flow
+
+    root = _corpus(tmp_path / "whole", PARENT, "order")
+    found = cross_flow(root / "diagrams" / "chapter-01-ordering.md",
+                       sorted((root / "diagrams").glob("*.md")))
+    assert not [f for f in found if "does not declare" in f], found
+
+
+def test_taking_a_part_elsewhere_is_a_demand_the_parent_must_carry(tmp_path):
+    """The other half, and the reason the check exists: a real escape still fires.
+
+    Asserted beside the case above, because a fix that silences the false positive by silencing
+    the check is indistinguishable from a fix until somebody loses a transit.
+    """
+    from goldspec.review import cross_flow
+
+    root = _corpus(tmp_path / "part", PARENT, "order.grade")
+    found = cross_flow(root / "diagrams" / "chapter-01-ordering.md",
+                       sorted((root / "diagrams").glob("*.md")))
+    assert [f for f in found if "does not declare" in f and "order.grade" in f], found

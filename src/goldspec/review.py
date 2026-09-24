@@ -442,10 +442,17 @@ def cross_flow(path: Path, siblings: list) -> list[str]:
             found.append(f"{name}#{drawn} takes {', '.join(unused)}, which no step of the chapter "
                          f"it drills into consumes")
         elsewhere = _read_elsewhere(siblings, Path(child_path).name)
+        # `spe5-sr7` — a taker of a PART reads a producer of the whole, and taking the whole is
+        # not a demand for any particular part. This read the rule backwards: `story` consumed by
+        # any chapter made every `story.*` a child produced look wanted, so a parent was told to
+        # declare `story.mutation.survived` because an unrelated flow elsewhere took a story.
+        #
+        # `unconsumed` asks the same question — does anybody read what this produces — and had
+        # always asked it the right way round. Two copies of one rule, and only one of them stated.
         escapes = sorted(e for e in gives
                          if e not in takes
                          and e not in p_out and e.split(".")[0] not in p_out
-                         and (e in elsewhere or e.split(".")[0] in elsewhere))
+                         and (e in elsewhere or any(d.startswith(e + ".") for d in elsewhere)))
         if escapes:
             found.append(f"{name}#{drawn} does not declare {', '.join(escapes)}, which the chapter "
                          f"it drills into produces and another chapter consumes")
