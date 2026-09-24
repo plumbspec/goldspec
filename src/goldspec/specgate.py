@@ -178,6 +178,17 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     from goldspec.flowcheck import faults, terminals
 
     report = Report()
+    # WHAT THIS RUN JUDGED BY, first, before any verdict about the spec.
+    #
+    # Every fault below is phrased as a statement about somebody's corpus, and the one cause none
+    # of them can phrase is having been handed the wrong strings. The command has named its basis
+    # on every run for exactly that reason; the library did not, so a caller who built a
+    # `Conventions` by hand had no way to see which one was wrong. One did: `flow_glob` kept its
+    # default while the namespace was corrected, the glob matched no file, and the run reported a
+    # corpus of 34 nodes as declaring nothing at all.
+    report.checked.append(
+        f"conventions: ids namespaced {conv.namespace!r}, flows in {conv.flow_dir}/{conv.flow_glob}")
+
     subjects = declared_in_spec(spec, conv)
     report.checked.append(f"{len(subjects)} subject(s) declared in {spec.name}/")
 
@@ -187,10 +198,18 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     # breath, and a whole spec silently becoming invisible is the largest regression this gate can
     # be asked about.
     if not subjects:
+        # How many files the glob MATCHED, against how many are sitting there. A count of zero
+        # beside a count of seven says *your glob is wrong* in a way no amount of prose does, and
+        # it is the difference between reading this as a verdict on the corpus and reading it as a
+        # verdict on the strings the gate was handed.
+        matched = len(_flow_files(spec, conv))
+        present = len(list((spec / conv.flow_dir).glob("*.md"))) if (spec / conv.flow_dir).is_dir() \
+            else 0
         report.problems.append(
             f"{spec.name}/ declares no subjects at all — this gate reads trace-table rows in "
-            f"{conv.flow_dir}/{conv.flow_glob} and found none, which is never a state anybody "
-            f"intends. Either the spec is not there, or its flows are shaped differently")
+            f"{conv.flow_dir}/{conv.flow_glob}, which matched {matched} of the {present} markdown "
+            f"file(s) there, which is never a state anybody intends. Either the spec is not there, "
+            f"or its flows are named differently from {conv.flow_glob!r}")
 
     # One row per subject. With the declaration and the description in one place a second row is
     # no longer a disagreement to reconcile — it is two claims wearing one id, and whichever a

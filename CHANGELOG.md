@@ -78,6 +78,23 @@ one number series with the ones at a node.
 its nodes `hol1`, `snd1`. A decision spelled the only way consistent with those nodes was declared
 nowhere, held to no namespace, and reported as no fault — the gate could not see it to refuse it.
 
+### A run says what it judged by, whichever door you came in
+
+Every fault this gate emits is a statement about your corpus, and the one cause none of them can
+phrase is having been handed the wrong strings. The command has named its basis on every run for
+that reason; the library had no equivalent, so a project calling `check_spec_directory` with a
+`Conventions` it built itself had nothing to check it against.
+
+The report now opens with the conventions it read by, and a glob that matched nothing says so
+against what is actually there:
+
+    conventions: ids namespaced 'ch', flows in diagrams/chapter-*.md
+    spec/ declares no subjects at all — … matched 0 of the 7 markdown file(s) there …
+
+Reported by a project whose corpus of 34 nodes came back as declaring nothing: the namespace had
+been corrected and `flow_glob` left at its default, so the glob matched no file and the verdict
+read as being about their spec.
+
 ### Smaller things
 
 - `goldspec --version` answers with the version you installed, where it could answer with an older

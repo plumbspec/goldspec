@@ -408,3 +408,48 @@ def test_the_padding_check_runs_under_a_projects_own_conventions(tmp_path):
                       "story-01-ordering.md"), (
         "the same mixed-width series passes under a custom flow glob — the padding check is "
         "looking for ids under a prefix no project id starts with")
+
+
+def test_the_library_names_what_it_judged_by(tmp_path):
+    """Every fault is a statement about somebody's corpus; being handed the wrong strings is not.
+
+    The command has named its basis on every run for exactly that reason. The library did not, so a
+    caller who built a `Conventions` by hand had nothing to check it against — and one did: the
+    namespace was corrected, `flow_glob` kept its default, the glob matched no file, and a corpus
+    of 34 nodes was reported as declaring nothing at all. The report says what it read by now.
+    """
+    from goldspec import check_spec_directory
+    from goldspec.conventions import Conventions
+
+    flows = tmp_path / "diagrams"
+    flows.mkdir()
+    (flows / "alt-weigh-it.md").write_text("# not in the node format\n", encoding="utf-8")
+
+    conv = Conventions(namespace="ch", flow_dir="diagrams")
+    report = check_spec_directory(tmp_path, conv)
+
+    basis = report.checked[0]
+    assert "ch" in basis and "diagrams/chapter-*.md" in basis, (
+        f"the report does not say what it judged by: {report.checked}")
+
+
+def test_a_glob_that_matched_nothing_says_so_against_what_is_there(tmp_path):
+    """`matched 0 of 7` is the sentence that ends the search; prose about shapes is not.
+
+    The fault reads as a verdict on the corpus — *declares no subjects at all* — and the reader's
+    obvious next move is to go and look at their spec. Counting what the glob matched against what
+    is sitting in the directory points at the glob instead, which is where the fault actually is.
+    """
+    from goldspec import check_spec_directory
+    from goldspec.conventions import Conventions
+
+    flows = tmp_path / "diagrams"
+    flows.mkdir()
+    for name in ("alt-weigh-it.md", "spe-specify-it.md", "vie-answer-it.md"):
+        (flows / name).write_text("# a chapter this glob will not match\n", encoding="utf-8")
+
+    report = check_spec_directory(tmp_path, Conventions(namespace="ch", flow_dir="diagrams"))
+
+    empty = [p for p in report.problems if "declares no subjects" in p]
+    assert empty, report.problems
+    assert "matched 0 of the 3 markdown file(s)" in empty[0], empty[0]

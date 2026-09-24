@@ -50,8 +50,9 @@ def main(argv: list[str] | None = None) -> int:
     source = find_config(spec)
     print(f"goldspec: conventions from {source}" if source
           else f"goldspec: no {CONFIG_NAME} found — checking against the defaults", file=sys.stderr)
-    print(f"goldspec: ids namespaced {conv.namespace!r}, flows in {conv.flow_dir}/{conv.flow_glob}",
-          file=sys.stderr)
+    # The strings themselves now travel on the report, so a library caller sees the same basis the
+    # command does. Only WHICH FILE they came from is the command's to say — `check_spec_directory`
+    # is handed a `Conventions` and never learns where it was read from.
 
     report = check_spec_directory(spec, conv, cited_from=spec.parent)
 
