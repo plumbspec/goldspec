@@ -13,6 +13,18 @@ neither drawn from it nor linked from a flow that is fails the gate.
 element its sub-flow's own drill-down consumed, because the chapter below the sub-flow counted as
 another chapter. Found by the first corpus three levels deep.
 
+**A chapter is held to every number its name carries.** `chapter-01.2.2-….md` expands `ch1-2-2`;
+the gate read only the first two numbers, so a third-level chapter could file its steps under any
+step of its grandparent and pass.
+
+**Citing a requirement names the step to cite instead.** A test citing `ch1-1-ur1` was told the id
+was declared nowhere, though it plainly was; it is now told the requirement belongs to `ch1-1`, and
+that a test cites the step.
+
+**A misnumbered chapter is reported as misnumbered.** Its steps were also reported as not in the
+flow, though they were drawn and connected; the namespace fault now says the file name may be the
+side that is wrong. The conventions line names the main flow when one is set.
+
 ## 0.2.0 — chapters that are stories, and one Python
 
 **A chapter is a set of stories, not a table.** Every step of a flow is somebody's story — a role,

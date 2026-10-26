@@ -154,10 +154,14 @@ def _chapter_prefix(md: Path, conv: Conventions) -> str:
     """
     stem = conv.flow_glob.replace("*", "").removesuffix(".md").rstrip("-")
     if stem:
-        found = re.match(rf"{re.escape(stem)}-(\d+)(?:\.(\d+))?", md.name)
+        # Every number the name carries, at whatever depth: `chapter-01.2.2-…` expands `ch1-2-2`
+        # (`spe1-sr5`). Reading only the first two let a third-level chapter file its steps under
+        # any step of its grandparent and pass.
+        found = re.match(rf"{re.escape(stem)}-(\d+)((?:\.\d+)*)", md.name)
         if found:
-            major, minor = found.groups()
-            return f"{conv.namespace}{int(major)}" + (f"-{int(minor)}" if minor else "")
+            major, rest = found.groups()
+            return f"{conv.namespace}{int(major)}" + "".join(
+                f"-{int(n)}" for n in rest.split(".")[1:])
     # The sigil the project declared, taken off the front of the filename with whatever number
     # follows it: `dev07-6-append-...` -> `dev07-6`, `ado-bring-...` -> `ado`. Read against the
     # declared namespace rather than off the first word, because a flow may be named for its reader
@@ -187,7 +191,8 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     # default while the namespace was corrected, the glob matched no file, and the run reported a
     # corpus of 34 nodes as declaring nothing at all.
     report.checked.append(
-        f"conventions: ids namespaced {conv.namespace!r}, flows in {conv.flow_dir}/{conv.flow_glob}")
+        f"conventions: ids namespaced {conv.namespace!r}, flows in {conv.flow_dir}/{conv.flow_glob}"
+        + (f", main flow {conv.main_flow}" if conv.main_flow else ""))
 
     subjects = declared_in_spec(spec, conv)
     report.checked.append(f"{len(subjects)} subject(s) declared in {spec.name}/")
@@ -206,7 +211,7 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
         present = len(list((spec / conv.flow_dir).glob("*.md"))) if (spec / conv.flow_dir).is_dir() \
             else 0
         report.problems.append(
-            f"{spec.name}/ declares no subjects at all — this gate reads trace-table rows in "
+            f"{spec.name}/ declares no subjects at all — this gate reads the steps of chapters in "
             f"{conv.flow_dir}/{conv.flow_glob}, which matched {matched} of the {present} markdown "
             f"file(s) there, which is never a state anybody intends. Either the spec is not there, "
             f"or its flows are named differently from {conv.flow_glob!r}")
@@ -216,7 +221,7 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     # reader finds first wins silently.
     for subject in sorted({s for s in subjects if subjects.count(s) > 1}):
         report.problems.append(
-            f"{subject} has more than one trace row — a subject says one thing, and an id "
+            f"{subject} is declared more than once — a subject says one thing, and an id "
             f"carrying two claims is answered for by whichever is read first")
 
     # What a test cites and what the spec declares, held against each other. This is the check the
@@ -231,8 +236,24 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
         known = set(subjects)
         cited = cited_subjects(cited_from)
         report.checked.append(f"{len(cited)} cited id(s) read from {cited_from}")
+        # What a test cannot cite, by owner: a requirement or a row is a constraint *on* a step,
+        # and the step is what a test proves. Said as that, not as "declared nowhere" — the id was
+        # plainly written down, and telling a reader it was not sends them looking for a typo.
+        from goldspec import nodes as node_format
+        owned = {}
+        for md in _flow_files(spec, conv):
+            chapter = node_format.read(md)
+            for node in (chapter.nodes if chapter else ()):
+                owned.update({r.id: (node.id, "a requirement") for r in node.requirements
+                              if r.kind != "u"})
+                owned.update({row.row_id: (node.id, "an Information row") for row in node.rows})
         for subject, where in sorted(cited.items()):
-            if ours.match(subject) and subject not in known:
+            if ours.match(subject) and subject not in known and subject in owned:
+                step, what = owned[subject]
+                report.problems.append(
+                    f"{subject} is cited by {where[0]} and is {what} of {step}, and a test cites "
+                    f"the step — cite {step} instead")
+            elif ours.match(subject) and subject not in known:
                 report.problems.append(
                     f"{subject} is cited by {where[0]} and declared nowhere in {spec.name}/ — a "
                     f"citation to a subject nobody wrote down reads as authoritative as any other")
@@ -376,8 +397,9 @@ def _nodes(spec: Path, conv: Conventions, report: Report) -> None:
         # Off the parsed chapter, never off the markdown again: the diagram had two readers and
         # they disagreed about which ids it draws, so a check could read an empty set and pass
         # without comparing anything.
-        drawn = {i for i in chapter.var2id.values() if i.startswith(prefix)}
-        found = node_format.faults(chapter, prefix, drawn)
+        # Every id the diagram draws. `faults` holds a block to the namespaced ones and a drawn id to
+        # all of them, so a misnumbered step is reported as misnumbered and not also as undrawn.
+        found = node_format.faults(chapter, prefix, set(chapter.var2id.values()))
         report.problems += found
 
 

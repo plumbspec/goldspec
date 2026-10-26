@@ -448,6 +448,14 @@ CASES: dict[str, dict[str, str]] = {
         "spec/goldspec.toml": NODE_FORMAT_ON,
         "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
     },
+    "cited_a_requirement": {
+        "spec/diagrams/chapter-01-example.md": CLEAN,
+        "spec/goldspec.toml": NODE_FORMAT_ON,
+        "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
+        "tests/test_something.py": (
+            "import pytest\n\n\n"
+            "@pytest.mark.proves(\"ch1-1-ur1\")\ndef test_a_requirement_rather_than_its_step():\n    pass\n"),
+    },
     "cited_and_declared_nowhere": {
         "spec/diagrams/chapter-01-example.md": CLEAN,
         "spec/goldspec.toml": NODE_FORMAT_ON,
@@ -578,7 +586,7 @@ EXPECTED: dict[str, str] = {
     "classdef_without_colour": "sets no `color:`",
     "node_sections_out_of_order": "not ['Nodes', 'Glossary']",
     "node_chapter_with_no_nodes": "a Nodes section that declares no nodes",
-    "node_not_namespaced": "expected ch1-<n>, so a citation from another chapter",
+    "node_not_namespaced": "expected ch1-<n>, or the file name",
     "node_expanded_twice": "is expanded more than once",
     "node_moves_nothing": "states no information at all",
     "node_kinded_id_not_namespaced": "#ch9-D1 is not namespaced to its chapter",
@@ -611,8 +619,9 @@ EXPECTED: dict[str, str] = {
     "subflow_parent_overclaims": "claims to leave with",
     "subflow_parent_takes_unused": "which no step of the chapter it drills into consumes",
     "subflow_parent_hides_a_transit": "does not declare",
-    "subject_declared_twice": "has more than one trace row",
+    "subject_declared_twice": "is declared more than once —",
     "cited_and_declared_nowhere": "declared nowhere in spec/",
+    "cited_a_requirement": "is a requirement of ch1-1, and a test cites the step",
     "main_flow_leaves_a_flow_unreached": "is neither drawn from the main flow nor referenced",
     "main_flow_names_no_flow": "names no flow in",
 }
@@ -909,6 +918,40 @@ def test_what_a_sub_flow_makes_and_takes_below_itself_never_left_it(tmp_path, ca
     code = main([str(_write(tmp_path, tree))])
     out = capsys.readouterr().out
     assert code == 0, out
+
+
+@pytest.mark.proves("spe1", depth="wiring")
+def test_a_chapter_three_levels_down_is_held_to_its_whole_number(tmp_path, capsys):
+    """`spe1-sr5` — `chapter-01.2.2-….md` expands `ch1-2-2`, so its steps are `ch1-2-2-1`, … and
+    not merely anything under `ch1-2`. Reading only the first two numbers let a step file itself
+    under the wrong parent and pass."""
+    deep = (CLEAN.replace("# Chapter 1 — a customer places an order", "# Chapter 1.2.2 — deeper")
+            .replace("ch1-D1", "ch1-2-2-D1").replace("ch1-1", "ch1-2-9").replace("ch1-2", "ch1-2-8")
+            .replace("ch1-2-8-9", "ch1-2-9"))
+    tree = {"spec/diagrams/chapter-01-example.md": CLEAN,
+            "spec/diagrams/chapter-01.2.2-deeper.md": deep}
+    code = main([str(_write(tmp_path, tree))])
+    out = capsys.readouterr().out
+    assert code != 0 and "expected ch1-2-2-<n>" in out, out
+
+
+@pytest.mark.proves("spe5", depth="wiring")
+def test_a_misnumbered_file_is_reported_as_misnumbered_and_nothing_else(tmp_path, capsys):
+    """`spe5-ur1` — a fault says what to do about it. A chapter whose file name carries the wrong
+    number has steps that are drawn and connected; telling the reader they are not in the flow sends
+    them to the diagram, and the namespace fault is the one that names the fix — either side."""
+    tree = {"spec/diagrams/chapter-02-example.md": CLEAN}
+    code = main([str(_write(tmp_path, tree))])
+    out = capsys.readouterr().out
+    assert code != 0 and "expected ch2-<n>" in out and "or the file name" in out, out
+    assert "is not in the flow" not in out, out
+
+
+def test_the_run_says_which_main_flow_it_judged_by(tmp_path):
+    """The conventions line is how a reader confirms what the run read; `main_flow` is on it."""
+    spec = _write(tmp_path, one_tree())
+    checked = _gate(spec).checked
+    assert any("main flow ord-take-an-order.md" in line for line in checked), checked
 
 
 @pytest.mark.proves("spe1-1-6", depth="wiring")

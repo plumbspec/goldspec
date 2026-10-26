@@ -1,6 +1,6 @@
 # Chapter 1 — a customer places an order and knows it was taken
 
-**Last updated** 2026-09-23 v2
+**Last updated** 2026-10-26 v3
 
 > **As a customer I want to place an order and be told it was accepted, so that I know I will be
 > charged for something that is actually coming.**
@@ -17,7 +17,7 @@ flowchart TD
     STOCK{<b>ch1-2</b><br/>is every line<br/>actually available?}:::question
     SHORT[/<b>REFUSED</b> · said before the card is charged,<br/>naming the line that is short/]:::bad
 
-    CHARGE[<b>ch1-3</b> · charge once, and only<br/>after the order is committed]:::process
+    CHARGE[[<b>ch1-3</b> · charge once, and only<br/>after the order is committed]]:::subroutine
     TELL[<b>ch1-4</b> · tell the customer,<br/>with a reference they can quote]:::process
     DONE([<b>END</b> · an order the shop can act on and<br/>the customer can ask about]):::good
 
@@ -36,7 +36,7 @@ flowchart TD
         LD{question}:::question
         LG([reached]):::good
         LB[/REFUSED — a different shape, so it reads in greyscale/]:::bad
-        LP>parameter — a value to discover]:::parameter
+        LP>"parameter — a value to discover"]:::parameter
     end
 
     classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;

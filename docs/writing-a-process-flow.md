@@ -1,6 +1,6 @@
 # Writing a process flow
 
-**Last updated** 2026-09-14 v8
+**Last updated** 2026-10-26 v10
 
 [`reviewing-a-chapter.md`](reviewing-a-chapter.md) is the test a chapter has to pass. This is the
 other half: how to write one so that it passes.
@@ -90,7 +90,7 @@ an exit seen from the other side, and the pair is symmetric; *leave* has no entr
 > configuring is a repair → **configuring is an enhancement**
 
 Both are one word, and both are product claims. A prohibition also reads as a constraint filed as a
-step, which is the shape `review.prohibitions` exists to catch. Prefer the positive; it is shorter
+step, which is a shape the gate catches. Prefer the positive; it is shorter
 and it is checkable.
 
 The same rule reaches sentence shape:
@@ -126,7 +126,7 @@ it*. Write every node at that level. Steps too big for it drill down into their 
 too small for it are requirements on the node above them.
 
 A layer can slip inside a single Information table — a row naming a command where its siblings name
-business information. The check for this is weak by nature: `review.restates_a_step` finds a row
+business information. The check for this is weak by nature: the gate finds a row
 that collides with a node the chapter already has, and a row described too finely that collides with
 nothing leaves no shadow at all. **Altitude is the thing a reader has to carry.**
 
@@ -153,8 +153,7 @@ a corpus-wide rewrite cannot reach it.
 section its number; to codify, arrange, rearrange and generally update the code so as to maintain an
 orderly and logical arrangement; and to publish an official report of all changes made in each
 recodification. Those are the three id rules: numbers assigned centrally, rearrangement legitimate
-in the name of orderly reading, and every renumbering one audited, reported pass. A citation
-composes at most four levels, packing the last two into one number.
+in the name of orderly reading, and every renumbering one audited, reported pass.
 
 Two deliberate divergences:
 
@@ -205,7 +204,7 @@ table is a second copy that goes stale.
 | the row is | it answers with |
 |---|---|
 | `In`, from a step of this flow | that step's id |
-| `In`, at a sub-flow's entry | `parent` — the chapter that drills into this one hands it in |
+| `In`, handed in from above | `parent` — the chapter that drills into this one, or hands off to it by link, supplies it; on whichever step first takes it, and `Required` as that step needs it |
 | `In`, from outside any step | `authored`, `observed` or `generated` |
 | `Out` | `derived`, `authored`, `observed` or `generated` — how this node made it |
 
@@ -213,7 +212,7 @@ The vocabulary is not invented for the column; it is the one a corpus already us
 fact came from. Only `parent` is new, because sub-flows are.
 
 Declaring it is not duplication of the diagram. The diagram says a step is reachable; the row says
-which step actually produced the thing, and the two disagreeing is a defect `review.provenance`
+which step actually produced the thing, and the two disagreeing is a defect the gate
 reports — a node that both takes and writes one element, whose produced row was labelled with the
 step the consumed row came from.
 
@@ -227,10 +226,10 @@ Every `In` is an earlier `Out`, handed in by a parent, or arrived from outside. 
 step missing an output or a whole step missing — and the chain finds it from the data alone, in
 chapters whose prose had admitted the problem and in chapters where nobody had noticed at all.
 
-And what the older shape's `Held` column was for: **information that accumulates with no later
-consumer is work being done for nobody**, and that is where process inefficiency is found. There is
-no `Held` column now; a step that keeps something to itself states it as a requirement, so the
-element does not read as defined and used by nobody.
+And **information that accumulates with no later consumer is work being done for nobody**, which is
+where process inefficiency is found. The run lists it as an observation and never fails on it,
+because a flow's own product looks the same from the data. A step that keeps something to itself
+states it as a requirement, so the element does not read as defined and used by nobody.
 
 ## 13 · If you touch it, it comes to the current format
 
@@ -297,9 +296,8 @@ title that disagrees with the parent's node text; a requirement that contradicts
 order; a step announcing a choice made two steps earlier; an element one chapter writes and another
 never does. And altitude, which is why a word-by-word read has not been retired.
 
-Those first six sat in the *checker* list for a long time and nothing checked any of them, which is
-the more expensive way for a list like this to be wrong: a reviewer who believes a machine has
-already looked stops looking.
+Nothing checks any of these, and it matters which list a thing is on: a reviewer who believes a
+machine has already looked stops looking.
 
 **Only the owner settles**: where a step sits in their own sequence; whether a claim is worth
 making; whether publishing an apparatus publishes a working method.
@@ -311,4 +309,4 @@ read nothing, move the first bucket into the checker, and keep the reader for th
 confirm it read something. The structural answer is one reader per pass: a chapter is parsed into an
 object, and every check over that object is a pure function of it, so no two of them can form
 different opinions of what a row says. Several passes still parse it separately — that is a debt,
-not a design, and it has produced a real disagreement at least once.
+not a design.

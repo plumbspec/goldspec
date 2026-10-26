@@ -420,7 +420,8 @@ def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
     for node in chapter.nodes:
         if not node.id.startswith(prefix):
             found.append(f"{name}#{node.id} is not namespaced to its chapter — expected "
-                         f"{prefix}-<n>, so a citation from another chapter is never ambiguous")
+                         f"{prefix}-<n>, or the file name carries the wrong number for the step it "
+                         f"expands; a citation from another chapter must never be ambiguous")
         if node.id in seen:
             found.append(f"{name}#{node.id} is expanded more than once — a node says one thing, and "
                          "an id carrying two is answered for by whichever is read first")
@@ -479,9 +480,11 @@ def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
             requirements_seen.add(req.id)
 
     # A node drawn and never expanded is the half that goes unnoticed: the diagram looks complete.
-    for drawn in sorted(in_flow - seen):
+    for drawn in sorted({i for i in in_flow if i.startswith(prefix)} - seen):
         found.append(f"{name}#{drawn} is drawn in the flow and has no node block — the diagram is "
                      "the authority and the expansion is what a reader follows it into")
+    # Against every id the diagram draws, namespaced or not: a step drawn under the wrong number is
+    # misnumbered, which the namespace fault already says, and is not missing from the flow.
     for expanded in sorted(seen - in_flow):
         found.append(f"{name}#{expanded} has a node block and is not in the flow — a step nothing "
                      "reaches cannot be performed")

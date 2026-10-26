@@ -1,6 +1,6 @@
 # Reviewing a chapter
 
-**Last updated** 2026-09-11 v2
+**Last updated** 2026-10-26 v4
 
 **For anybody reading a chapter and deciding whether it is right — including the person who wrote it.**
 
@@ -39,12 +39,17 @@ story is one of those four.
 | Is it a constraint the work must satisfy? | a **requirement** — UR, SR or NFR on the node it constrains |
 | Is it something the tool deliberately does not do? | a **boundary** — an NFR, not an unknown |
 
+*Depth*, *PROVEN* and *the board* are [Plumb](https://plumbspec.org/)'s words: Plumb runs the
+tests, reads the marks they carry, and derives how deeply each story is proven onto a board.
+goldspec checks only that the ids a test cites resolve to subjects in the spec — see
+[cite the spec from a test](getting-started.md#10-cite-the-spec-from-a-test).
+
 **Where the citation lives is not in the chapter.** `proves` and `informs` are carried by the
 annotation on the test, and the depth is derived by a run and reported on the board. A chapter that
 also names the tests that prove it is carrying a second copy that goes stale — the same defect as
 reporting its own build status, and it passes every other gate.
 
-`review.carries_proof` catches three shapes of it — a click link to a test file, a trace table keyed
+The gate catches three shapes of it — a click link to a test file, a trace table keyed
 by test name, and a `Spec source:` line. **A sentence that names a test in prose is not caught**, so
 this one is mostly yours.
 
@@ -75,7 +80,7 @@ into their own chapters.
 **Altitude cannot be fully checked.** There is no invariant for *is this at the right level* — the
 data cannot say what level the node was supposed to be at. What can be checked is a **shadow**: a row
 or a requirement that names something the chapter already has as a node is probably a layer low, and
-`review.restates_a_step` reports that. A row described too finely that happens to collide with
+the gate reports that. A row described too finely that happens to collide with
 nothing leaves no shadow, and only a reader will see it.
 
 Look for: a requirement describing a mechanism the person never touches; a description naming a
@@ -107,7 +112,7 @@ Not what happened, not why, not what was tried. Specifically, none of these belo
   chapter has two sides"*. A spec does not report on its own size or structure.
 - **Build status.** *"specified and unbuilt"*, *"nothing implements one"*. Whether something is built
   is derived from a run and reported on the board. A spec that says it is carrying a second copy that
-  goes stale. `review.build_status` catches a short list of *build*-status phrases and a `classDef`
+  goes stale. The gate catches a short list of *build*-status phrases and a `classDef`
   named for whether a thing is built. **A status somebody typed — `Status: accepted`, *(done)* — is
   refused by nothing**, so that half is a reader's.
 
@@ -116,7 +121,7 @@ Not what happened, not why, not what was tried. Specifically, none of these belo
 **Measurements stay; attribution goes.** A number needs no owner. *"measured at 346µs a round-trip"*
 is a fact; *"measured on another team's suite"* discloses whose.
 
-`review.attribution` catches a narrow band of this — a figure in the same sentence as *measured on
+The gate catches a narrow band of this — a figure in the same sentence as *measured on
 a…*, *the evidence is a…*, *the reference project*, or a possessive naming a pilot, customer, client
 or adopter. It is deliberately narrow, because *a customer* is the business domain of half the specs
 anybody will write and a matcher that fired on it taught readers to stop reading the output. **The
@@ -140,7 +145,7 @@ the time a design session spends *finding* what is being discussed is enormous.
 
 - **They must sort with a plain sort**, so left-pad each number to the width its own largest member
   needs. A series numbered no higher than 9 uses one digit; adding a tenth takes the whole series to
-  two and rewrites every one of them. Checked by `review.padded`.
+  two and rewrites every one of them. The gate checks it.
 - **Renumbering is forever, and that is accepted.** The burden falls on whoever maintains the corpus
   rather than on everyone reading it. It is affordable only because the rewrite is one audited pass —
   rename one subject and every citation to it moves at once.
@@ -158,7 +163,8 @@ followed by `derived` or `authored`.
 The version is not decoration. A chapter revised between a morning session and an afternoon one is two
 documents on the same date, and a room needs to know which is on the table. **Every change is a
 version, including a typo** — a misspelling in a requirement stops a session while people work out
-whether it is a mistake or a distinction. Checked by `review.stamped`.
+whether it is a mistake or a distinction. The gate checks the stamp's shape; where it sits
+is not checked.
 
 ## What a node owes, structurally
 
@@ -179,46 +185,39 @@ reader the search.
 A node's Information table is what the person needs (In) and what they leave with (Out). Two things
 are derived from it, and both find real defects:
 
-**The chain.** Every In must be an earlier Out, an import, or something authored. A gap means either
+**The chain.** Every In must be an earlier Out, handed in by the parent, or arrive from outside the
+flow — `authored`, `observed` or `generated`. A gap means either
 a step is missing an output or **a whole step is missing**. The chain finds an unclaimed step from the
 data alone, without the chapter having to admit it in prose, and finds a missing step nobody has
-noticed at all. Checked by `review.chain`.
+noticed at all. The gate checks it.
 
 **What accumulates.** Information a node leaves with that no later step consumes is work being done
-for nobody, and that is where process inefficiency is found. This is what the older shape's `Held`
-column was for; there is no `Held` column now, and a step that keeps something to itself says so as
-a requirement. Reported by `review.unconsumed`, which searches the whole corpus for a reader before
-calling anything idle — and which is counted rather than gated, because a flow's own product looks
-identical to waste from the data alone.
+for nobody, and that is where process inefficiency is found. A step that keeps something to itself says so
+as a requirement. The run lists each one as an *observation*, after searching every chapter it
+reads for a step that takes it — and counts it rather than failing on it, because a flow's own
+product, such as a confirmation sent to a customer, looks identical to waste from the data alone.
 
 ## What the gates cannot see
 
-`review.py` is two lists and no flag between them, because a flag over both meant turning one
-report off turned every real gate off with it. **`review()` fails a run**: the chain, provenance,
-the stamp, padding, prohibitions, build status, a named test, an attributed figure, a row that
-restates a step, and the sub-flow checks. **`observations()` is counted and never fails one** — `unconsumed` is the whole of
-it, because it has no invariant to hold. There is nothing to switch on.
+A run reports two kinds of finding, and nothing switches either off. **Faults fail it**: the
+chain, provenance, the stamp, padding, prohibitions, build status, a named test, an attributed
+figure, a row that restates a step, and the sub-flow checks. **Observations are counted and never
+fail it** — information nothing downstream takes is the whole of that list, because it has no
+invariant to hold.
 
 Read the output knowing:
 
-- **A check passing on a format it cannot parse is worse than no check.** If a check says `ok`,
-  confirm it read something. That is what `nodes.read` is for: the markdown is observed once into a
-  chapter, and every check over it is a pure function of that object, so no two of them can form
-  different opinions of what a row says.
-
-  **The whole run is not yet one read.** `review`, `cross_flow` and `observations` each parse the
-  chapter again, and `flowcheck` opens the file for itself — one chapter is read from disk several
-  times per run. Each of those is internally consistent and none of them is free: the section scan
-  used to be one of them, and its second reading of a `##` line disagreed with the first about
-  whether a heading inside a code fence was a heading.
-- **A sub-flow's entry point is `chain`'s business too, now.** A row whose provenance is `parent`
-  answers *where does this come from* with something outside the flow, exactly as `authored` does,
-  so `chain` passes over it rather than reporting it unproduced. What holds the two sides together
-  is `cross_flow`, which reads the parent and the child against each other. An earlier version of
-  this page told readers to expect chain faults on those rows and dismiss them, which was a
-  standing licence to ignore a real failure.
-- **`unconsumed` cannot see a later run.** A cursor written today is read tomorrow by the same
-  chapter, and no static walk of one flow will find that.
+- **A check passing on a format it cannot parse is worse than no check.** `0 fault(s)` looks the
+  same whether the gate read your chapter or nothing at all, so read the counts above it — subjects,
+  flows that render, chapters in the node format, nodes — and confirm they are the size of what you
+  wrote.
+- **A sub-flow's entry point is not a chain fault.** A row whose provenance is `parent` answers
+  *where does this come from* with something outside the flow, exactly as `authored` does, so the
+  chain passes over it rather than reporting it unproduced. What holds the two sides together is
+  the sub-flow check, which reads the parent's node against the chapter it drills into. A chain
+  fault on any row is a real finding; none of them is expected and dismissed.
+- **Observations cannot see a later run.** A cursor written today is read tomorrow by the same
+  chapter, and no reading of the flow will find that.
 
 ## Failures worth knowing about in advance
 

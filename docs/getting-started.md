@@ -3,10 +3,11 @@
 **Write your first chapter, understand every part of it, and get the gate green.**
 
 This walks one complete chapter part by part. The chapter ships at
-[`docs/example/`](example/), and goldspec's own test suite runs the gate over it on every run, so
+[`docs/example/spec/diagrams/chapter-01-ordering.md`](example/spec/diagrams/chapter-01-ordering.md), and goldspec's own test suite runs the gate over it on every run, so
 what you read here is what the gate accepts.
 
-You need `goldspec` installed and a directory. Nothing else — no project, no test suite, no language.
+You need `goldspec` installed — it runs on Python 3.9 or later — and a directory. Nothing else: no
+project, no test suite, and your own work need not be in Python.
 
     mkdir -p spec/diagrams
 
@@ -83,13 +84,17 @@ So a step that is itself a process gets its own file, and the file name carries 
 |---|---|
 | `chapter-01-ordering.md` | `ch1-1`, `ch1-2`, … |
 | `chapter-01.3-charging.md` | `ch1-3-1`, `ch1-3-2`, … |
+| `chapter-01.3.2-retries.md` | `ch1-3-2-1`, `ch1-3-2-2`, … |
 
-`chapter-01.3-charging.md` would be the drill-down of node `ch1-3`. Every id inside it is prefixed
+`chapter-01.3-charging.md` is the drill-down of node `ch1-3`. Every id inside it is prefixed
 `ch1-3`, and in the parent that node is drawn as a **sub-flow** — `[[…]]` `:::subroutine` — so a
-reader knows to follow it.
+reader knows to follow it. **A drill-down of a drill-down keeps every number**, separated by dots:
+`chapter-01.3.2-….md` expands step `ch1-3-2`, and its ids are prefixed `ch1-3-2`.
 
-*(Illustrative. The [worked example](example/) has no drill-down: it fits on a page, which is the
-whole test. A node drawn as a plain action is a node that did not need one.)*
+The worked example carries one: step `ch1-3` of
+[`chapter-01-ordering.md`](example/spec/diagrams/chapter-01-ordering.md) drills into
+[`chapter-01.3-charging.md`](example/spec/diagrams/chapter-01.3-charging.md). Its other steps are
+plain actions, because they did not need one.
 
 **A sub-chapter carries all the same sections.** It is a flow like any other; nothing about it is
 abbreviated.
@@ -140,18 +145,42 @@ its steps, or as a step of a flow under it, or linked from one that is. A reader
 top can then find every chapter, and a flow nobody reaches is one nobody will read.
 
 **Every other flow is a drill-down of the step it is entered from, and is named for that step.**
-A flow entered at `ch1-3` is `chapter-01.3-….md` (or `ch1-3-….md` in a corpus named by sigil),
-and its steps are `ch1-3-1`, `ch1-3-2`. Where a step needs a whole process beside it rather than
-inside it, give that process a step of its own next to it — `ch1-3-1`, drawn as a sub-flow — and
-name its chapter for that. The file names alone then show the tree, and nobody has to open a file
-to find out where it sits. A second root, named for nothing in the tree, is the sprawl this rule
-is there to prevent.
+A flow entered at `ch1-3` is `chapter-01.3-….md` (or `ch1-3-….md` in a corpus whose files are named
+by sigil), and its steps are `ch1-3-1`, `ch1-3-2`. The file names alone then show the tree, and
+nobody has to open a file to find out where it sits. A second root, named for nothing in the tree,
+is the sprawl this rule is there to prevent.
 
-Name it in your conventions with `main_flow`, and the gate holds the rest: a flow neither drawn from
-it nor linked from a flow that is is a fault. A flow entered from several places — the same
-hand-over used by more than one step — is linked from where it is entered rather than drawn twice.
-A flow that is only ever linked, and drawn nowhere, is legitimate, but it is usually a sign that the
-work is being handed off to another business process.
+**Drawn or linked — one question decides it: is the other process part of this one?**
+
+- **Part of this process** — a step that is itself a process. Draw it as a sub-flow, `[[…]]`, and
+  give it a chapter named for that step.
+- **Another business process the work leaves for** — billing, after a clinic has treated somebody;
+  the warehouse, after the shop has taken an order. Do not draw it. **Link it**: put a markdown link
+  to its file, `[billing](chapter-01.5.3-billing.md)`, in the prose of a chapter that is reached —
+  the chapter's introduction or a node's text both count. Name the linked chapter for the step that
+  hands off, exactly as for a drill-down: a hand-off at `ch1-5-3` is `chapter-01.5.3-billing.md`,
+  with steps `ch1-5-3-1`, … — so the names still show the tree. Any of its steps may take what is
+  handed over with provenance `parent` (§4).
+
+One consequence catches people. **Something a sub-flow produces that a linked chapter consumes has
+left the sub-flow**, so the parent's node for that sub-flow must list it as an `Out`. Leave it off
+and the gate says so:
+
+    chapter-01-ordering.md#ch1-5 does not declare charge request, which the chapter it drills into
+      produces and another chapter consumes
+
+goldspec's own spec is laid out this way: `spe-specify-a-process.md` is the main flow;
+`spe1-1-enter-the-method.md`, `spe6-1-…`, `spe6-2-…` and `spe6-3-…` expand its steps; and
+`spe6-2-3-1-share-a-word-across-owners.md` expands a step of `spe6-2`.
+
+Name the main flow in your conventions with `main_flow`, and the gate holds the rest: **a flow
+neither drawn from it nor linked from a flow that is reached is a fault.** *Drawn* means a step drawn
+as a sub-flow, `[[…]]`, whose chapter's steps are numbered under it. *Linked* means a markdown link to
+the flow's file by its bare name — a file in the same directory — `[…](chapter-01.3-charging.md)`,
+anywhere in a reached flow. A flow
+entered from several places — the same hand-over used by more than one step — is linked from where
+it is entered rather than drawn twice. A flow that is only ever linked, and drawn nowhere, is
+legitimate, but it usually marks work being handed off to another business process.
 
 ---
 
@@ -183,7 +212,7 @@ flowchart TD
   them out of that check.
 - **The flow has a start and an end.** If every node is pointed at by another, nothing says where it
   begins. Two ends are fine, and so is a cycle.
-- **Every class a node names is defined by a `classDef`** in the same chapter. Use one that is not
+- **Every class a node names is defined by a `classDef`** in the same mermaid block. Use one that is not
   and the node renders unstyled, so the gate names it rather than letting the mistake be invisible.
 
 **What is advice, and worth taking:**
@@ -206,11 +235,14 @@ dialect:
 |---|---|---|
 | start / end | `([…])` `:::terminal` | where the flow begins, and where it finishes |
 | action | `[…]` `:::process` | a step somebody performs |
-| decision | `{…}` `:::question` | a question with named arms |
+| question | `{…}` `:::question` | a question with named arms |
 | sub-flow | `[[…]]` `:::subroutine` | a step that drills down into its own chapter |
 | reached | `([…])` `:::good` | a successful ending |
 | refused | `[/…/]` `:::bad` | an ending that is a refusal, and is on purpose |
 | parameter | `>"…"]` `:::parameter` | a value still to discover, hanging off the step it tunes |
+
+**The diamond is a *question*, not a decision.** A question is a fork in the flow with named arms;
+a *Decision* (`ch1-D1`, §5) is a choice already settled, stated under a step, and is never drawn.
 
 Seven shapes, and the set is closed. Six of them are steps of the flow. The seventh hangs off one:
 
@@ -235,7 +267,9 @@ flowchart TD
 **Quote a parameter's label — `P1>"…"]`, with the quotes.** This is the one shape where that is
 not optional. A parameter is not a step, so it gets no `###` block; unquoted, its id reads as a
 node the diagram draws, and the gate then asks for the block that is never coming. The quotes are
-what keep it out of that check, exactly as a legend node's lack of an id keeps the legend out.
+what keep it out of that check, exactly as a legend node's lack of an id keeps the legend out. The
+legend's sample parameter carries no id, so it would pass unquoted; it is quoted anyway, so the
+legend you copy shows the form you write.
 
 **Everything else that is undecided or imposed stays out of the picture**, under the node it
 affects (§5), where a reader meets it beside the step rather than in the margin of a drawing.
@@ -271,7 +305,7 @@ flowchart TD
         LD{question}:::question
         LG([reached]):::good
         LB[/REFUSED — a different shape, so it reads in greyscale/]:::bad
-        LP>parameter — a value to discover]:::parameter
+        LP>"parameter — a value to discover"]:::parameter
     end
 
     classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;
@@ -293,12 +327,16 @@ In the parent, a sub-flow node keeps an ordinary `###` block with its Informatio
 the parent's altitude — what the whole sub-process takes and leaves, not what its steps do. The two
 sides are held against each other: the parent may not claim to leave with what no step of the child
 produces, may not take what no step of the child consumes, and must take what the child needs and
-neither makes for itself nor gets from outside any step. Those are matched on the Description cell,
-by the rule in §4, so the two files have to spell a thing the same way.
+neither makes for itself nor gets from outside any step. And what the child produces that another
+chapter consumes must be declared on the parent's node, because that is the step it leaves
+through. What the child makes and takes below itself — in its own steps, or in a chapter it drills
+into at whatever depth — never left it, and the parent does not restate it. All of this is matched
+on the Description cell, by the rule in §4, so the two files have to spell a thing the same way.
 
 **Everything in the child is prefixed by the parent's node id**, and nothing about the child is
-abbreviated — same sections, same legend, same stamp. Written out, because a sub-chapter is the one
-shape the [worked example](example/) does not carry:
+abbreviated — same sections, same legend, same stamp. The worked example's
+[`chapter-01.3-charging.md`](example/spec/diagrams/chapter-01.3-charging.md) is one, and this is
+how its names line up with the parent's:
 
 | in the parent | in the child `chapter-01.3-charging.md` |
 |---|---|
@@ -306,7 +344,13 @@ shape the [worked example](example/) does not carry:
 | — | an Information row is `ch1-3-1-inf1` — node id, then kind, then number |
 | — | a requirement is `ch1-3-1-ur1`, an unknown `ch1-3-1-u1` |
 | — | a parameter is `ch1-3-P1` and a decision `ch1-3-D1` — one series per chapter, as anywhere |
-| its `###` block says what the whole sub-process takes and leaves | its entry rows say `parent` in Provenance |
+| its `###` block says what the whole sub-process takes and leaves | a row taking what the parent hands in says `parent` in Provenance |
+
+**`parent` goes on whichever step first takes a thing handed in from above** — not only on the
+child's first step. In the example, `ch1-3-1` takes `order` and `order.reference` from `parent`, and
+`ch1-3-3`, two steps later, takes `order.reference` from `parent` too, because nothing in the child
+made it. Such a row's `Required` says what *that step* needs, like any other row; the parent's own
+row does not decide it.
 
 The child's H1 names the process from a person's side like any other chapter, and carries the
 drill-down number: `# Chapter 1.3 — the card is charged exactly once`. Nothing checks that wording,
@@ -378,7 +422,7 @@ because on a first run no run has written one.
 | it says | it means | legal on |
 |---|---|---|
 | a step's id, like `ch1-1` | that step, in this flow, produced it | `In` |
-| `parent` | the flow that hands this one its entry — the chapter drilling into it | `In` |
+| `parent` | handed in from above — by the chapter drilling into this one, or handing off to it by link — on whichever step first takes it | `In` |
 | `authored` | somebody wrote it down; nothing produces it | both |
 | `observed` | read off a run, or the world as it stands | both |
 | `generated` | made by a tool, and not recomputable | both |
@@ -413,9 +457,9 @@ Under the Information table, four headings, always in this order and always pres
     #### Unknowns
       * ch1-2-u1 - how long a reservation is held is not measured
 
-**A bullet is `  * <id> - <what it requires>`**, with a hyphen between the id and the text. Not a
-colon, not an em dash: the separator is what the parser reads, and the gate names a bullet written
-another way rather than passing over it.
+**A bullet is `  * <id> - <what it requires>`**, with a hyphen between the id and the text (an en
+or em dash reads the same). Not a colon, and not nothing: the separator is what the parser reads,
+and the gate names a bullet written another way rather than passing over it.
 
 **A constraint is a requirement with an id, on the step it constrains.** There is no chapter-level
 list of them — that would move a constraint away from the thing it constrains.
@@ -459,7 +503,7 @@ under it:
     ---
 
 That is the normal state of a chapter somebody is still writing, and the [worked
-example](example/) carries three of them.
+example](example/spec/diagrams/chapter-01-ordering.md) carries three of them.
 
 **Parameters and decisions live at the foot of the node they constrain.** There is no
 `## Parameters` section and no `## Decisions` section — adding one fails the section-set check, and
@@ -623,25 +667,30 @@ than lenient. Every other heading fails the section check: there is no `## Eleme
 
 ## 9. Run the gate
 
+Run from `docs/example/`, the worked example gives:
+
     $ goldspec spec
     goldspec: conventions from goldspec.toml
-    goldspec: ids namespaced 'ch', flows in diagrams/chapter-*.md
-    goldspec: 6 subject(s) declared in spec/
+    goldspec: conventions: ids namespaced 'ch', flows in diagrams/chapter-*.md
+    goldspec: 14 subject(s) declared in spec/
     goldspec: 0 cited id(s) read from .
-    goldspec: 1 process flow(s) render
-    goldspec: 1 of 1 chapter(s) in the node format, 4 node(s)
+    goldspec: 2 process flow(s) render
+    goldspec: 2 of 2 chapter(s) in the node format, 8 node(s)
     goldspec: chapter-01-ordering.md: 2 observation(s) — an element nothing downstream takes …
     goldspec:   chapter-01-ordering.md#ch1-2 leaves with refusal, reservation, which nothing …
     goldspec:   chapter-01-ordering.md#ch1-4 leaves with confirmation, which nothing …
+    goldspec: chapter-01.3-charging.md: 1 observation(s) — an element nothing downstream takes …
+    goldspec:   chapter-01.3-charging.md#ch1-3-4 leaves with decline, which nothing …
     0 fault(s) in spec
 
-Exit `0` clean, `1` with faults, `2` when the run could not start — an unreadable `goldspec.toml`,
-or a spec directory that is not there. A `2` writes nothing to stdout, so a redirected report is
-empty rather than clean; the reason is on stderr.
+Exit `0` clean, `1` with faults, `2` when the run could not start — a `goldspec.toml` that cannot
+be read or names a key this version does not know, or a spec directory that is not there. A `2`
+writes nothing to stdout, so a redirected report is empty rather than clean; the reason is on
+stderr.
 
 **Every `goldspec:` line is on stderr, and the faults and the count are on stdout.** So
 `goldspec spec > report.txt` gives you a file holding the faults and their count and nothing else,
-and `2>&1` is how you keep the rest. An exit `2` writes to neither — check the code, not the file. That split is deliberate — a report that carried its own context
+and `2>&1` is how you keep the rest. That split is deliberate — a report that carried its own context
 would be stating something its source does not — and it is worth knowing, because the lines you
 most want when a fault surprises you are the ones a redirect throws away.
 
@@ -658,10 +707,10 @@ look*, and they are the only way to tell, because the two are the same thing to 
 looks identical whether it parsed four nodes or found no chapters at all. If those numbers are not
 the size of what you wrote, the run did not judge what you think it judged.
 
-**`subject(s)` counts what a test can cite** — the nodes, the parameters and the decisions. Your
-requirements, your unknowns written as bullets, and your Information rows all carry ids so a room
-can point at them, and none of them is in that number. `node(s)` is the one to check your chapter
-against.
+**`subject(s)` counts what a test can cite** — the nodes, the parameters, the decisions and the open
+unknowns. The example's fourteen are its eight nodes across two chapters, `ch1-D1`, `ch1-P1`,
+`ch1-3-P1` and its three unknowns. Your requirements and your Information rows carry ids so a room
+can point at them, and neither is in that number. `node(s)` is the one to check your chapter against.
 
 ### What a refusal looks like
 
@@ -694,6 +743,7 @@ here is a defect in this page.
 | `classDef` | a class a node names that no `classDef` in the chapter defines, and a `classDef` setting no `color:` |
 | the `####` headings | a node that states some of the five and not all five, or states them out of order |
 | requirement ids | a requirement named for a step other than the one it sits under; an id stated twice; and a bullet opening with a requirement-shaped id that nothing can read |
+| Information rows | a row named for a step other than the one it sits under, and a five-column table row the parser cannot read — no `<node>-infN` id, or an `IO` it does not know — which would otherwise be dropped before any check saw it |
 | the chain | an `In` that no earlier step produces and no provenance accounts for |
 | provenance | an empty cell; a value outside the closed set; a step named that does not produce the thing, or that the flow does not reach this node from |
 | id numbering | a series padded to mixed widths, so a plain sort will not order it |
@@ -705,14 +755,15 @@ here is a defect in this page.
 | the corpus, not just this file | one id declared twice, whether in one chapter or across two — usually a drill-down whose prefix is wrong, colliding with its own parent |
 | the spec as a whole | a spec that declares no subjects at all, and a `## Nodes` section that declares no nodes. Neither is a state anybody intends, so neither is read as a pass |
 | a decision or parameter's id | one not namespaced to its chapter, wherever it is stated, and one stated twice |
-| a citation | an id cited by a test that no chapter in this spec declares |
+| a citation | an id in this spec's namespace, cited by a test, that no chapter declares; and a cited requirement or Information row, which names the step to cite instead (§10) |
 | sub-flows | a node drawn `[[…]]` that no chapter expands, and a parent and child disagreeing about what crosses between them |
 | the main flow | where `main_flow` is named, a file that is not one of the flows, and a flow neither drawn from it nor linked from a flow that is |
 
 **`parent` is not checked against the corpus.** Nothing confirms that a chapter using it is one
 something else actually drills into, and nothing can: with `siblings`, the flow that hands this one
 its entry may live in a repository this run cannot see. So it is the one provenance value that
-excuses an input from the chain on your word — use it at a sub-flow's entry and nowhere else.
+excuses an input from the chain on your word. Use it only in a chapter that is drilled into or
+linked to, on a row taking something handed in from above — whichever step first takes it.
 
 ### What it does not check, and you should not assume it does
 
@@ -732,6 +783,8 @@ to get wrong:
   compared.
 - **Where the stamp sits.** Its shape is checked and its position is not, so a stamp at the foot of
   the file passes. What may follow the version is not a closed set either, whatever it looks like.
+- **That `proves` cites a step and `informs` a decision.** Either mark may cite any subject; the
+  gate checks only that the id resolves (§10).
 - **Altitude**, which is why a word-by-word read has not been retired.
 
 **A fault may cite an id of goldspec's own spec** — `` (`spe6`) `` on the stamp, `(spe6-1-4)` on the
@@ -739,13 +792,88 @@ start-and-end check. Those name the subject inside this methodology's own chapte
 comes from. They are a pointer for whoever maintains the gate; nothing about your chapter depends
 on being able to resolve one, and you can read straight past them.
 
-**One thing is counted and never fails a run**: information a node leaves with that nothing
-downstream takes. Every flow ends by producing something for a person, so that is a flow's product
-about as often as it is waste — the run says what it saw and you decide.
+**One thing is counted and never fails a run: observations.** An observation lists information a
+node leaves with that nothing downstream takes — in this chapter or any other the run reads. That
+includes waste, and it also includes everything a flow exists to hand to a person: the example's
+`confirmation` and `refusal` go to the customer, and no step of any chapter takes them, so they are
+listed. The line says *work being done for nobody* because from the data alone the two look the
+same. Read the list, and for each one ask whether a person receives it. If one does, it is a
+product and there is nothing to do — an observation is never gated, and nothing silences it.
 
 ---
 
-## 10. Your conventions, in one file
+## 10. Cite the spec from a test
+
+A test says what it is evidence for with a mark on the test itself, carrying a subject's id. The
+spec never names the test; the test names the spec.
+
+```python
+import pytest
+
+@pytest.mark.proves("ch1-3")
+def test_a_retried_charge_is_charged_once():
+    ...
+
+@pytest.mark.informs("ch1-D1")
+def test_nothing_assumes_same_day_settlement():
+    ...
+```
+
+```java
+@Proves("ch1-3")                 // @Proves(value = "ch1-3") reads the same
+@Test void aRetriedChargeIsChargedOnce() { ... }
+
+@Informs("ch1-D1")
+@Test void nothingAssumesSameDaySettlement() { ... }
+```
+
+**`proves` cites a step; `informs` cites a decision, a parameter or an open unknown.** Those four
+are what a test can cite — the subjects §9 counts. goldspec checks that the id resolves, not which
+mark it sits under.
+
+**One id per mark.** Only the first string is read: `proves("ch1-3", "ch1-4")` cites `ch1-3` and
+silently drops `ch1-4`. To cite two, stack two marks. Keyword arguments such as `depth="wiring"`
+are read by Plumb, not by goldspec.
+
+**Where the gate looks:** the directory that holds your spec directory — usually the repository
+root — and everything under it. It reads every `.py`, `.java`, `.kt`, `.groovy` and `.scala` file
+and skips `.git`, `target`, `build`, `node_modules`, `__pycache__`, `.venv`, `venv` and `dist`.
+Only the mark form counts: an id in a comment, a docstring or a plain string is not a citation. The
+mark is matched as text, though, so a commented-out mark still counts — delete it instead.
+
+**What it refuses.** Only ids in this spec's namespace are checked; an id from another namespace is
+left to the spec that owns it. A cited id no chapter declares is a fault, and so is a cited
+requirement or Information row, because a test proves the step they constrain:
+
+    ch1-9 is cited by tests/test_orders.py and declared nowhere in spec/ — a citation to a
+      subject nobody wrote down reads as authoritative as any other
+    ch1-1-ur1 is cited by tests/test_orders.py and is a requirement of ch1-1, and a test cites
+      the step — cite ch1-1 instead
+
+**Read the count.** The run prints how many distinct ids it found, in any namespace:
+
+    goldspec: 3 cited id(s) read from .
+
+A `0` there when you have marked tests means the gate did not recognise them — the mark is spelled
+some other way, or the files are not under the spec directory's parent.
+
+**Register the marks under plain pytest.** When Plumb runs your tests, its adapter registers
+`proves` and `informs`. Run by pytest alone, every marked test raises `PytestUnknownMarkWarning`
+unless you register them yourself:
+
+```ini
+[pytest]
+markers =
+    proves(id): this test proves a story in the spec
+    informs(id): this test informs a decision, parameter or unknown in the spec
+```
+
+What a run makes of the citations — whether a story is proven, and how deeply — is
+[Plumb](https://plumbspec.org/)'s. goldspec checks only that what the tests cite is written down.
+
+---
+
+## 11. Your conventions, in one file
 
 Ids namespaced `REQ` or `sh`, flows in a directory named to suit you: all yours. Say so in a
 `goldspec.toml`, **inside your spec directory or beside it** — `spec/goldspec.toml` or
@@ -757,16 +885,18 @@ namespace = "ord"              # ids read ord1-1, ord1-2
 flow_dir  = "flows"            # where the process flows live, relative to the spec
 flow_glob = "story-*.md"       # how a flow file is named
 siblings  = ["../shared/spec"] # more of this corpus, read for what it defines, never checked
-main_flow = "story-01-orders.md" # the one flow the corpus starts from — see "One main flow"
+main_flow = "story-01-orders.md" # the flow the corpus starts from, by file name in flow_dir — §2
 ```
 
 Every key is optional, and the defaults are our habits: `namespace = "ch"`, `flow_dir = "diagrams"`,
-`flow_glob = "chapter-*.md"`, no siblings, no main flow named. A
-project that took all of them writes no file at all.
+`flow_glob = "chapter-*.md"`, no siblings, and no main flow named — so reachability is not
+checked until you name one. A project that took all of them writes no file at all. Those five keys
+are the whole set: any other key under `[conventions]` stops the run with exit `2` and the list of
+keys this version reads, rather than being ignored.
 
 **Write only what differs.** A key restating a default is a copy, and it will not rot at the same
 rate as the original — if a default ever moves, your file silently disagrees with it. The
-[example's](example/goldspec.toml) whole conventions table is one line.
+[example's `goldspec.toml`](example/goldspec.toml) is a `[conventions]` header with nothing under it.
 
 **The file name decides the id prefix, and it is checked.** The namespace, then the number the
 file name carries, and a drill-down keeps its parent's number with it:
@@ -775,13 +905,14 @@ file name carries, and a drill-down keeps its parent's number with it:
 |---|---|---|---|
 | `chapter-*.md` | `ch` | `chapter-01-ordering.md` | `ch1` |
 | `chapter-*.md` | `ch` | `chapter-01.3-charging.md` | `ch1-3` |
+| `chapter-*.md` | `ch` | `chapter-01.3.2-retries.md` | `ch1-3-2` |
 | `flow-*.md` | `req` | `flow-01-repairs.md` | `req1` |
 | `story-*.md` | `ord` | `story-07.2-refunds.md` | `ord7-2` |
+| `*-*.md` | `spe` | `spe6-2-3-1-share-a-word-across-owners.md` | `spe6-2-3-1` |
 
-Get the number wrong and every id in the file is reported as not namespaced to its chapter.
-
-What a step moves is stated in the step's own rows, with a provenance per row, so there is no
-chapter-level table to hold to separate rules and no flag deciding whether it is held.
+The last row is a file named by sigil, as goldspec's own spec is: the prefix is the namespace and
+every number that follows it in the file name, at whatever depth. Get the number wrong and every id
+in the file is reported as not namespaced to its chapter.
 
 **The command reads this file and so does the library**, so a project running both cannot end up with
 two gates over one spec that disagree.
@@ -793,11 +924,12 @@ nothing reports that: a directory with no file and a project that took every def
 thing to the gate. The run's first line is what separates them, which is why it prints on clean
 runs too.
 
-**A chapter is held to the shape it is written in**, and nothing has to be declared for that.
-Every corpus written before this format exists in the older shape — one
-`## Input → process → output` and one `## Data definitions` per chapter — and a chapter in that
-shape is counted and never held to the node format's checks. Convert one and it is held to what
-the node shape owes, the moment it is converted and not before.
+**A chapter is held to the shape it is written in**, and nothing has to be declared for that. A
+chapter with a `## Nodes` section is in the node format this page teaches, and is held to it. A
+chapter without one is read in the older shape — one `## Input → process → output` and one
+`## Data definitions` per chapter — and is counted, and never held to the node format's checks; the
+run's `chapter(s) in the node format` line says how many of each it found. Convert a chapter and it
+is held to what the node format owes from that run on.
 
 Two limits, stated because they bite during a conversion. An unconverted chapter **declares no
 subjects**, so a test citing one is reported as citing something declared nowhere; and a spec in
@@ -806,7 +938,7 @@ rather than calling it a pass. Convert the chapters your tests cite first.
 
 ---
 
-## 11. What a spec does not hold
+## 12. What a spec does not hold
 
 | Not this | Why | Where it goes |
 |---|---|---|
@@ -822,10 +954,33 @@ a failure of the spec — it is the work, visible.
 
 ---
 
+## 13. Bringing in a document you already have
+
+A team usually has a document before it has a spec: a status line, an owner, numbered
+requirements, open questions, a history of incidents, some measured numbers. Every part has a home,
+or is dropped:
+
+| In the old document | Goes to |
+|---|---|
+| the steps, however they are written | the flow — one node per step (§3) |
+| numbered requirements | requirements with ids, on the step each one constrains (§5) |
+| open questions | open unknowns under the step they affect (§6) — or a decision, if it has been settled |
+| a Status line | nowhere — status is derived from a run |
+| an owner | nowhere in the chapter — version control records who changed it |
+| history, incidents, *what we tried* | the commit message — and a constraint an incident taught becomes a requirement |
+| a measured value used as a working estimate | a parameter, with its model (§5) |
+| notes that are not requirements | an optional trailing `## Working notes` (§8) |
+
+**Then retire the original.** Once everything in it has a home, delete it — version control keeps
+it — or keep it outside the spec directory, where the gate does not read it. Without version
+control, history has no home in the spec: drop it, or keep it in a file outside the spec.
+
+---
+
 ## Where to go next
 
-- **[The worked example](example/)** — the chapter above as a spec directory you can copy and run
-  `goldspec` against.
+- **[The worked example](example/spec/diagrams/chapter-01-ordering.md)** — the chapter above and
+  its drill-down, shipped in a spec directory you can copy and run `goldspec` against.
 - **[Plumb](https://plumbspec.org/)** — derives whether a story is actually proven by a test run.
   goldspec checks that what you wrote down is coherent; Plumb checks that the code honours it.
   Neither requires the other.

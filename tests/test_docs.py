@@ -54,8 +54,8 @@ def test_the_example_actually_exercises_the_checks():
     # an open unknown — one of those four kinds — was refused as "declared nowhere" about a bullet
     # sitting in plain sight. An example is read as the authority on every question the prose
     # leaves open, so both taught the opposite of the page beside them.
-    assert "8 subject(s)" in checked, f"the example stopped declaring its eight subjects: {checked}"
-    assert "chapter(s) in the node format, 4 node(s)" in checked, (
+    assert "14 subject(s)" in checked, f"the example stopped declaring its fourteen subjects: {checked}"
+    assert "chapter(s) in the node format, 8 node(s)" in checked, (
         f"the example no longer reads as four nodes, so the checks the tutorial says it exercises "
         f"are not being run over it: {checked}")
     assert "process flow(s) render" in checked, f"the example's flow no longer renders: {checked}"
