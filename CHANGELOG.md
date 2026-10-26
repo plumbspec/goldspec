@@ -2,7 +2,7 @@
 
 What each release gives you, and what to change to take it.
 
-## Unreleased
+## 0.3.0 — one tree, and a gate a newcomer can follow
 
 **One main flow, and one tree under it.** Name the flow a corpus starts from with `main_flow` in
 `goldspec.toml`. Every other flow is a drill-down of the step it is entered from, named for that
