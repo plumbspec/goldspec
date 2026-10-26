@@ -25,6 +25,20 @@ that a test cites the step.
 flow, though they were drawn and connected; the namespace fault now says the file name may be the
 side that is wrong. The conventions line names the main flow when one is set.
 
+**A requirement in a `-` or numbered bullet is named, not skipped.** Documents being converted
+write requirements as `- R1 …` or `1. R1 …`; those were silently ignored, so no check held them.
+They are now reported as written in a shape nothing reads.
+
+**A link to a chapter nobody wrote is reported.** A hand-off linked before its chapter exists, or to
+a misspelling of one, read as reaching it.
+
+**A parameter is never a flow's end.** Drawn without its `:::parameter` class it was counted as one,
+so a flow that never ended passed the check for having a value to tune.
+
+**A sibling spec is read under its own conventions.** It was read with this spec's file pattern, so
+a sibling that named its chapters differently was read as holding nothing, and every word borrowed
+from it looked defined nowhere.
+
 ## 0.2.0 — chapters that are stories, and one Python
 
 **A chapter is a set of stories, not a table.** Every step of a flow is somebody's story — a role,

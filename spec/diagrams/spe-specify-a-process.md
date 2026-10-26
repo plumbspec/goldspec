@@ -1,6 +1,6 @@
 # spe · specify a process
 
-**Last updated** 2026-10-26 v8
+**Last updated** 2026-10-26 v9
 
 What somebody who owns a process does to write it down, so that what they decided can be argued
 with and what they left out can be found. This is the method's main flow: every other flow is one
@@ -263,6 +263,8 @@ flowchart TD
     every declared step placed, every decision arm handled
   * spe5-ur6 - a requirement or a row that names something the chapter already has as a step is
     reported
+  * spe5-ur7 - a link to a flow file that is not in the corpus is reported, so a hand-off to a
+    chapter nobody wrote is never mistaken for one that exists
 
 #### System Requirements
   * spe5-sr1 - the gate is a pure source scan — no build, no network, no rendering

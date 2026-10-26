@@ -448,6 +448,14 @@ CASES: dict[str, dict[str, str]] = {
         "spec/goldspec.toml": NODE_FORMAT_ON,
         "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
     },
+    "link_to_no_flow": one_tree(**{"ord-take-an-order.md": ORDERING.replace(
+        "## Nodes", "Paid for in [pay · take payment](pay-take-payment.md).\n\n## Nodes")}),
+    "sibling_conventions_unreadable": {
+        "spec/diagrams/chapter-01-example.md": CLEAN,
+        "spec/goldspec.toml": NODE_FORMAT_ON,
+        "neighbour/goldspec.toml": '[conventions]\nflows = "story-*.md"\n',
+        "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
+    },
     "cited_a_requirement": {
         "spec/diagrams/chapter-01-example.md": CLEAN,
         "spec/goldspec.toml": NODE_FORMAT_ON,
@@ -622,6 +630,8 @@ EXPECTED: dict[str, str] = {
     "subject_declared_twice": "is declared more than once —",
     "cited_and_declared_nowhere": "declared nowhere in spec/",
     "cited_a_requirement": "is a requirement of ch1-1, and a test cites the step",
+    "link_to_no_flow": "which is not a flow in",
+    "sibling_conventions_unreadable": "cannot be read under its own conventions",
     "main_flow_leaves_a_flow_unreached": "is neither drawn from the main flow nor referenced",
     "main_flow_names_no_flow": "names no flow in",
 }
@@ -952,6 +962,61 @@ def test_the_run_says_which_main_flow_it_judged_by(tmp_path):
     spec = _write(tmp_path, one_tree())
     checked = _gate(spec).checked
     assert any("main flow ord-take-an-order.md" in line for line in checked), checked
+
+
+@pytest.mark.proves("spe5", depth="wiring")
+def test_a_requirement_in_a_dash_or_numbered_bullet_is_named_not_skipped(tmp_path, capsys):
+    """`spe5-sr4` — a requirement written as `- id - …` or `1. id - …`, the way most documents
+    being converted already write them, is named as unread rather than silently dropped."""
+    for bullet in ("  - ch1-1-ur1 - ", "1. ch1-1-ur1 - "):
+        tree = {"spec/diagrams/chapter-01-example.md": CLEAN.replace("  * ch1-1-ur1 - ", bullet)}
+        code = main([str(_write(tmp_path / bullet.strip()[0], tree))])
+        out = capsys.readouterr().out
+        assert code != 0 and "ch1-1-ur1" in out and "shape nothing reads" in out, (bullet, out)
+
+
+@pytest.mark.proves("spe5", depth="wiring")
+def test_a_link_to_a_chapter_nobody_wrote_is_reported(tmp_path, capsys):
+    """A hand-off linked before its chapter exists, or to a misspelled file, is named rather than
+    passed over: the corpus reads as reaching a chapter that is not there."""
+    tree = one_tree(**{"ord-take-an-order.md": ORDERING.replace(
+        "## Nodes", "Paid for in [pay · take payment](pay-take-payment.md).\n\n## Nodes")})
+    code = main([str(_write(tmp_path, tree))])
+    out = capsys.readouterr().out
+    assert code != 0 and "pay-take-payment.md" in out and "not a flow" in out, out
+
+
+@pytest.mark.proves("spe1", depth="wiring")
+def test_a_parameter_is_never_the_end_of_a_flow_whatever_its_style(tmp_path, capsys):
+    """A parameter hangs off the step it tunes; it is not where the flow arrives. Drawn without its
+    `:::parameter` class it was counted as an ending, so a flow that never ended passed."""
+    tree = {"spec/diagrams/chapter-01-example.md": CLEAN.replace(
+        """    START([START]):::terminal
+    TAKE[ch1-1 take the order]:::process
+    CHARGE[ch1-2 charge once]:::process
+    DONE([END]):::good
+    START --> TAKE --> CHARGE --> DONE""",
+        """    A[a] --> B[b]\n    B --> C[c]\n    C --> B\n    P1>"ch1-P1 a value"]\n    B -.tuned by.-> P1""")}
+    code = main([str(_write(tmp_path, tree))])
+    out = capsys.readouterr().out
+    assert code != 0 and "the flow has no end" in out, out
+
+
+@pytest.mark.proves("spe1-1-2", depth="wiring")
+def test_a_sibling_is_read_under_its_own_conventions(tmp_path, capsys):
+    """`spe1-1-2-ur4` — each project keeps its own conventions file. A sibling that names its flows
+    `story-*.md` is read under its own file, not under this spec's `chapter-*.md`, so what this
+    spec hands it is seen to be taken there."""
+    takes_the_charge = (NEIGHBOUR.replace("`enquiry` | yes | authored", "`charge` | yes | authored"))
+    tree = {"spec/diagrams/chapter-01-example.md": CLEAN,
+            "spec/goldspec.toml": '[conventions]\nsiblings = ["../neighbour"]\n',
+            "neighbour/goldspec.toml": '[conventions]\nflow_glob = "story-*.md"\n',
+            "neighbour/diagrams/story-03-people.md": takes_the_charge}
+    spec = _write(tmp_path, tree)
+    code = main([str(spec)])
+    said = capsys.readouterr()
+    assert code == 0, said.out
+    assert "leaves with charge" not in said.err, said.err
 
 
 @pytest.mark.proves("spe1-1-6", depth="wiring")

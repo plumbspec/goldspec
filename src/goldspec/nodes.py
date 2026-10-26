@@ -119,7 +119,11 @@ _REQUIREMENT = re.compile(
 #: ownership check and the duplicate check simply go quiet, on a line that looks exactly right.
 #: Nothing counts requirements either, so there was no number a reader could have compared — which
 #: is the one remedy this method offers for a check that read nothing.
-_REQUIREMENT_SHAPED = re.compile(r"^\s*\*\s+([\w.-]+?-(?:ur|sr|nfr|u)\d+)", re.M | re.I)
+#: Any list marker — `*`, `-`, `+` or a number — because a document being converted writes its
+#: requirements as `- R1 …` or `1. R1 …` far more often than as `*`, and a bullet the reader skips is
+#: a requirement nothing holds (`spe5-sr4`).
+_REQUIREMENT_SHAPED = re.compile(r"^\s*(?:[*+-]|\d+[.)])\s+([\w.-]+?-(?:ur|sr|nfr|u)\d+)",
+                                 re.M | re.I)
 
 _H2 = re.compile(r"^## ", re.M)
 _H3 = re.compile(r"^### ", re.M)

@@ -1,6 +1,6 @@
 # Chapter 1 — a customer places an order and knows it was taken
 
-**Last updated** 2026-10-26 v3
+**Last updated** 2026-10-26 v4
 
 > **As a customer I want to place an order and be told it was accepted, so that I know I will be
 > charged for something that is actually coming.**
@@ -114,7 +114,8 @@ flowchart TD
 **Parameter `ch1-P1` — how long a reservation is held.** The model is available today: the
 distribution of reservation-to-charge times bounds it from below, because a reservation shorter
 than a slow card releases stock somebody has been promised; the rate at which reserved stock is
-abandoned unbought bounds it from above.
+abandoned unbought bounds it from above. Working value fifteen minutes; confirmed by those two
+distributions.
 
 ---
 

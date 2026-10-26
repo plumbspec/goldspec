@@ -9,6 +9,10 @@ gets the gate green; [Cite the spec from a test](docs/getting-started.md#10-cite
 shows the mark a test carries to say which story it proves. [All the documentation](docs/README.md).
 goldspec runs on Python 3.9 or later.
 
+**Already have a document?** [Bringing in a document you already have](docs/getting-started.md#13-bringing-in-a-document-you-already-have)
+says where each part of it goes — steps, requirements, open questions, measured numbers — and what
+is dropped.
+
 **Already using it?** [CHANGELOG.md](CHANGELOG.md) says what each release changed and whether
 taking it asks anything of you.
 
@@ -54,6 +58,11 @@ Two artifacts ship from the same release, listed in one `SHA256SUMS` and covered
 
 If you are reading a spec, take the command. If you are holding a spec to its gates on every run,
 take the library.
+
+    goldspec [SPEC_DIR] [--sibling DIR]…
+
+`SPEC_DIR` defaults to `spec`. `--sibling` is the command-line form of the `siblings` key below,
+repeatable, and adds to any the file names.
 
 ## Your conventions, in one place both forms read
 
@@ -108,7 +117,12 @@ A file anywhere else is not read and nothing says so, because nothing can: a dir
 `goldspec.toml` in it and a project that took the defaults are the same thing. The run's first line
 is what tells you which happened.
 
-Every run says which conventions it judged by, and where they came from. That line is worth reading
+Every run says which conventions it judged by, and where they came from:
+
+    goldspec: conventions from spec/goldspec.toml
+    goldspec: conventions: ids namespaced 'sh', flows in flows/story-*.md, main flow story-01-orders.md
+
+The second line ends with the main flow only where `main_flow` is named. Both are worth reading
 when a fault surprises you: every message this gate emits is phrased as a verdict on your spec, and
 the one cause it cannot phrase is having been handed the wrong strings.
 

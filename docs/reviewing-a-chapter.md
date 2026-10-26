@@ -241,6 +241,10 @@ by what left. Branch names, commit subjects, commit bodies and code comments all
 repository and all carry it straight back. Say what changed — *corrected the spec to reflect what
 the product offers* — and nothing more.
 
+This is about redaction. A commit converting an existing document is not a removal in that sense:
+it says what was converted and what was retired, because that is the change
+([getting started §13](getting-started.md#13-bringing-in-a-document-you-already-have)).
+
 The same applies to a guide like this one: **every example here is synthesised, or drawn from this
 method's own corpus.** A guide that teaches people not to leak, illustrated with the thing being
 protected, is the leak.

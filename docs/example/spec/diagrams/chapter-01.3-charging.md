@@ -1,6 +1,6 @@
 # Chapter 1.3 — the card is charged exactly once
 
-**Last updated** 2026-10-26 v1
+**Last updated** 2026-10-26 v2
 
 > **As a customer I want my card charged once for my order, however the processor's answers arrive,
 > so that a slow network is never a second payment out of my account.**
@@ -104,7 +104,7 @@ flowchart TD
 **Parameter `ch1-3-P1` — how long to wait for an answer.** The model is available today: the
 distribution of the processor's response times bounds it from below, because waiting less than a
 slow answer takes asks about charges that are still on their way; the time a customer will watch a
-spinner bounds it from above.
+spinner bounds it from above. Working value ten seconds; confirmed by those two bounds.
 
 ---
 

@@ -9,6 +9,7 @@
 | [Reviewing a chapter](reviewing-a-chapter.md) | anybody reading a chapter and deciding whether it is right | the judgements a gate cannot make, and the failures that look like style |
 | [The worked example](example/spec/diagrams/chapter-01-ordering.md) | anybody who would rather read a file than a page | the worked chapter from the tutorial and [its drill-down](example/spec/diagrams/chapter-01.3-charging.md), shipped in `docs/example/` as a spec directory you can run `goldspec` against |
 | [Cite the spec from a test](getting-started.md#10-cite-the-spec-from-a-test) | anybody wiring tests to the spec | the `proves` and `informs` marks, where the gate looks for them, and what it refuses |
+| [Bringing in a document you already have](getting-started.md#13-bringing-in-a-document-you-already-have) | anybody converting an existing document into a chapter | where each part of the old document goes, what is dropped, and what the conversion's commit says |
 
 The example is checked by this project's own suite on every run, so an example that fails when
 copied cannot ship.

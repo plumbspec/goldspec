@@ -183,6 +183,10 @@ def terminals(source: str) -> tuple[list[str], list[str]]:
     having an unanswered question in it, which is the opposite of what the check is for.
     """
     nodes = {m.group(1): (m.group(5) or "")[3:] for m in _NODE.finditer(source)}
+    # The shape is what makes a parameter one (`>"…"]`), so it hangs off the flow whatever class it
+    # was given: without `:::parameter` it was counted as an ending, and a flow that never ended
+    # passed for having a value to tune.
+    shaped = {m.group(1) for m in _NODE.finditer(source) if m.group(2) == ">"}
     edges = _edges(source)
     for a, b in edges:
         nodes.setdefault(a, "")
@@ -191,7 +195,7 @@ def terminals(source: str) -> tuple[list[str], list[str]]:
     targets = {b for _, b in edges}
 
     starts = [n for n, cls in nodes.items()
-              if n in sources and n not in targets and cls not in _HANGS_OFF]
+              if n in sources and n not in targets and cls not in _HANGS_OFF and n not in shaped]
     ends = [n for n, cls in nodes.items()
-            if n in targets and n not in sources and cls not in _HANGS_OFF]
+            if n in targets and n not in sources and cls not in _HANGS_OFF and n not in shaped]
     return starts, ends

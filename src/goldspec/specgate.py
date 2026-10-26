@@ -285,7 +285,26 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     _nodes(spec, conv, report)
     _review(spec, conv, report)
     _reached(spec, conv, report)
+    _dangling(spec, conv, report)
     return report
+
+
+def _dangling(spec: Path, conv: Conventions, report: Report) -> None:
+    """A link to a flow file the corpus does not have (`spe5-ur7`).
+
+    Named because a link is how a hand-off is reached: one pointing at a chapter nobody wrote, or
+    at a misspelling of one, reads as reaching it when nothing is there.
+    """
+    from fnmatch import fnmatch
+
+    flows = {p.name for p in _flow_files(spec, conv)}
+    for path in _flow_files(spec, conv):
+        text = path.read_text(encoding="utf-8")
+        for name in sorted(set(re.findall(r"\]\(([^)#\s/]+\.md)(?:#[^)]*)?\)", text))):
+            if fnmatch(name, conv.flow_glob) and name not in flows:
+                report.problems.append(
+                    f"{path.name} links {name}, which is not a flow in {spec.name}/{conv.flow_dir}/ "
+                    f"— write that chapter, or correct the link")
 
 
 def _reached(spec: Path, conv: Conventions, report: Report) -> None:
@@ -344,7 +363,17 @@ def _review(spec: Path, conv: Conventions, report: Report) -> None:
     # says out loud that it looked is the worst one to have looking nowhere.
     linked = list(flows)
     for other in conv.siblings:
-        linked += sorted((Path(other) / conv.flow_dir).glob(conv.flow_glob))
+        # Under the sibling's own conventions, never this spec's (`spe1-1-2-ur4`): each project
+        # keeps its own conventions file, and a sibling naming its flows differently was read as
+        # holding nothing at all.
+        from goldspec.conventions import ConfigError, conventions_for
+        try:
+            theirs = conventions_for(Path(other))
+        except ConfigError as bad:
+            report.problems.append(f"the sibling {other} cannot be read under its own conventions "
+                                   f"— {bad}")
+            continue
+        linked += sorted((Path(other) / theirs.flow_dir).glob(theirs.flow_glob))
 
     for path in flows:
         report.problems += process_checks.review(path, linked, _chapter_prefix(path, conv))

@@ -1,6 +1,6 @@
 # spe1-1 · enter the method
 
-**Last updated** 2026-10-26 v5
+**Last updated** 2026-10-26 v6
 
 What a team with years of specifications in whatever shape they accumulated does to start using
 this method on them — without hand-converting everything first, and without a day where nothing
@@ -88,6 +88,9 @@ flowchart TD
   * spe1-1-2-ur2 - a project says what its own subjects are called
   * spe1-1-2-ur3 - the conventions live in one place, read by the command and by whatever the
     project runs as a test
+  * spe1-1-2-ur4 - a sibling spec is read under its own conventions, never this one's: each
+    project keeps its own conventions file, and a sibling that names its files differently is
+    still read
 
 #### System Requirements
   * spe1-1-2-sr1 - what the corpus is cannot be inferred; a gate reading one spec directory is told
