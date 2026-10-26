@@ -1,15 +1,16 @@
 # spe · specify a process
 
-**Last updated** 2026-10-26 v5
+**Last updated** 2026-10-26 v6
 
 What somebody who owns a process does to write it down, so that what they decided can be argued
 with and what they left out can be found. This is the method's main flow: every other flow is one
 of its steps. A team with specifications already written enters through
-[ent · enter the method](ent-enter-the-method.md); a word another spec defines is settled in
-[sha · share a word across owners](sha-share-a-word-across-owners.md); another approach to a
-stamped flow is weighed in [alt · weigh an alternative](alt-weigh-an-alternative.md); and what
-this produces is held by [cus · keep the corpus](cus-keep-the-corpus.md) and read by
-[vie · answer an audience](vie-answer-an-audience.md).
+[ent · enter the method](ent-enter-the-method.md); another approach to a stamped flow is weighed in
+[alt · weigh an alternative](alt-weigh-an-alternative.md); what this produces is held by
+[cus · keep the corpus](cus-keep-the-corpus.md); where two owners' specs define one word, technical
+staff reconcile it in [sha · share a word across owners](sha-share-a-word-across-owners.md), and
+nobody's chapter is failed for it; and [vie · answer an audience](vie-answer-an-audience.md) reads
+the result.
 
 ```mermaid
 flowchart TD
@@ -24,11 +25,12 @@ flowchart TD
     CONSTRAIN[<b>spe4</b> · give every constraint an id beside the step it constrains]:::process
     FITS{does every step<br/>still fit on a page?}:::question
     GATE[<b>spe5</b> · run the gates and read what they found]:::process
-    SHA[[<b>sha</b> · share a word across owners<br/>▸ drills down]]:::subroutine
     STAMP[<b>spe6</b> · stamp it]:::process
     ALTQ{another approach<br/>worth weighing?}:::question
     ALT[[<b>alt</b> · weigh an alternative<br/>▸ drills down]]:::subroutine
     CUS[[<b>cus</b> · keep the corpus<br/>▸ drills down]]:::subroutine
+    SHAQ{do two owners' specs<br/>define one word?}:::question
+    SHA[[<b>sha</b> · share a word across owners<br/>▸ drills down]]:::subroutine
     VIE[[<b>vie</b> · answer an audience<br/>▸ drills down]]:::subroutine
 
     OUT([<b>END</b> · a chapter a person reads, a gate holds,<br/>and an audience is answered from]):::good
@@ -40,10 +42,12 @@ flowchart TD
     FITS -->|it is a page| GATE
     FITS -->|it is a flow| DRAW
     GATE -->|faults| STORY
-    GATE -->|a word another spec defines| SHA --> GATE
     GATE -->|clean| STAMP --> ALTQ
     ALTQ -->|yes| ALT --> DRAW
-    ALTQ -->|no| CUS --> VIE --> OUT
+    ALTQ -->|no| CUS --> SHAQ
+    SHAQ -->|yes| SHA --> VIE
+    SHAQ -->|no| VIE
+    VIE --> OUT
 
     classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;
     classDef process fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;
@@ -304,30 +308,6 @@ flowchart TD
 
 ---
 
-### sha · share a word across owners
-
-> **As the owner of a spec whose word another spec also defines I want the two settled without
-> either of us rewriting, so that both specs stay ours and still mean something to each other.**
-
-#### Information
-
-| Information | IO | Description | Required | Provenance |
-|---|---|---|---|---|
-| sha-inf1 | In | `name_conflict` | yes | observed |
-| sha-inf2 | In | `synonym_candidate` | yes | observed |
-| sha-inf3 | Out | `namespace_mapping` | yes | derived |
-
-#### User Requirements
-
-#### System Requirements
-
-#### Non-Functional Requirements
-
-#### Unknowns
-
-
----
-
 ### spe6 · stamp it
 
 > **As somebody holding a printed chapter I want it to say when it last changed, so that I can tell
@@ -395,6 +375,32 @@ flowchart TD
 |---|---|---|---|---|
 | cus-inf1 | In | `chapter` | yes | spe1 |
 | cus-inf2 | Out | `subject.key` | yes | derived |
+| cus-inf3 | Out | `name_conflict` | optional | derived |
+
+#### User Requirements
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
+
+
+---
+
+### sha · share a word across owners
+
+> **As technical staff serving two business units that use one word I want what it means to each
+> written down, so that neither unit is made to give up its word and the code still knows which
+> one it means.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| sha-inf1 | In | `name_conflict` | yes | cus |
+| sha-inf2 | In | `synonym_candidate` | optional | authored |
+| sha-inf3 | Out | `namespace_mapping` | yes | derived |
 
 #### User Requirements
 

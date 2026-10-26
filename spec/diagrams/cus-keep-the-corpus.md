@@ -1,12 +1,13 @@
 # cus · keep the corpus
 
-**Last updated** 2026-10-26 v2
+**Last updated** 2026-10-26 v3
 
 What somebody responsible for a body of specifications does to keep it citable for as long as
 anything points at it: hold it in one authority, name its subjects so the name outlives the number,
 and record what every change did. Entered from [spe · specify a process](spe-specify-a-process.md),
 which produces what is held. Exits to [vie · answer an audience](vie-answer-an-audience.md), which
-renders from it.
+renders from it, and to [sha · share a word across owners](sha-share-a-word-across-owners.md) where
+two owners' specs define one word.
 
 ```mermaid
 flowchart TD
@@ -119,6 +120,7 @@ flowchart TD
 | cus3-inf3 | Out | `corpus_store` | yes | derived |
 | cus3-inf4 | Out | `corpus_store.format_version` | yes | generated |
 | cus3-inf5 | Out | `subject.claim_digest` | yes | derived |
+| cus3-inf6 | Out | `name_conflict` | optional | derived |
 
 #### User Requirements
   * cus3-ur1 - subjects, claims, lineage and change history live in one place, and every
@@ -128,6 +130,9 @@ flowchart TD
     displays, what a reviewer reads, and the most that is ever handed outside the method
   * cus3-ur4 - the file says which version wrote it, and a file carrying no stamp is read as the
     version it structurally is
+  * cus3-ur5 - a word two owners' specs both define is handed to the technical staff who reconcile
+    it (sha), and neither owner's spec is failed or changed for it — two business units may use one
+    word for different things
 
 #### System Requirements
   * cus3-sr1 - the store lives in the adopter's own repository as plain text, reviewable in a pull

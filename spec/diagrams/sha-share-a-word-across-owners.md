@@ -1,15 +1,16 @@
 # sha · share a word across owners
 
-**Last updated** 2026-09-14 v1
+**Last updated** 2026-10-26 v2
 
-What two teams do when both of their specs define the same word: settle it where one of them owns
-both sides, and where neither does, say what the two words mean to each other without either team
-being made to rewrite theirs. Entered from [spe · specify a process](spe-specify-a-process.md),
-whose gates report the shared name.
+What technical staff do when two teams' specs define the same word: settle it where one of them
+owns both sides, and where neither does, say what the two words mean to each other without either
+team being made to rewrite theirs. Two business units may use one word for different things, and
+that is theirs to do. Entered from [cus · keep the corpus](cus-keep-the-corpus.md), where the
+corpus holding both specs shows the shared word.
 
 ```mermaid
 flowchart TD
-    IN([<b>START</b> · a name defined in two specs,<br/>reported by a gate]):::terminal
+    IN([<b>START</b> · a name defined in two specs,<br/>shown where the corpus holds both]):::terminal
 
     OWNQ{does one owner<br/>hold both sides?}:::question
     RENAME[<b>sha1</b> · settle it by renaming, where both sides are yours]:::process
