@@ -4,12 +4,10 @@ What each release gives you, and what to change to take it.
 
 ## Unreleased
 
-**One main flow.** Name the flow a corpus starts from with `main_flow` in `goldspec.toml`. Its
-steps are the corpus's other flows, each named by its own prefix — `ado` for a flow whose steps are
-`ado1`, `ch2` for one whose steps are `ch2-1` — so a flow takes its place under it with no id
-changing, and the boundary is checked like any sub-flow's. A main flow may also be a process
-with steps of its own, which are still held to its own prefix. Once it is named, a flow neither drawn
-from it nor linked from a flow that is fails the gate.
+**One main flow, and one tree under it.** Name the flow a corpus starts from with `main_flow` in
+`goldspec.toml`. Every other flow is a drill-down of the step it is entered from, named for that
+step, so the file names alone show where each chapter sits. Once the main flow is named, a flow
+neither drawn from it nor linked from a flow that is fails the gate.
 
 **What a sub-flow makes and takes below itself never left it.** A step was told to declare an
 element its sub-flow's own drill-down consumed, because the chapter below the sub-flow counted as

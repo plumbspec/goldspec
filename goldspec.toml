@@ -8,12 +8,10 @@
 [conventions]
 # Our own habits. A project whose subjects read `REQ` or `sh` says so here and is checked the same.
 #
-# The corpus is a set of process flows, each named by its sigil: `spe` (specify a process), `cus`
-# (keep the corpus), `ent` (enter the method), `vie` (answer an audience), `alt` (weigh an
-# alternative), `sha` (share a word across owners). The namespace is their alternation, because a
-# citation is held against the spec that owns its sigil and no other — and the sibling corpus owns
-# a different set, which is what keeps one joint corpus from two repositories' worth of ids.
-namespace = "(?:spe|cus|ent|vie|alt|sha)"
+# The corpus is one tree: spe is the main flow, and every other chapter expands one of its steps,
+# named for that step so a file name says where it sits (`spe6-2-3-1-…` expands `spe6-2-3-1`). One
+# sigil, because there is one tree, and the sibling corpus owns another.
+namespace = "spe"
 # Every flow file's name carries its sigil and a hyphen; `legend.md` — the shared drawing legend,
 # which is not a flow — is the one file the pattern deliberately misses.
 flow_glob = "*-*.md"
@@ -23,7 +21,7 @@ flow_glob = "*-*.md"
 # sibling defines — a manifest, a citation, what a run achieved. A gate
 # seeing half a corpus cannot tell a correct reference to a neighbour from a reference to
 # nothing, and must not guess, so the extent is declared and the sibling is read for the names it
-# defines, never checked (`ent2`). It is gated by its own run, where it is the subject rather than
+# defines, never checked (`spe1-1-2`). It is gated by its own run, where it is the subject rather than
 # the context.
 #
 # Relative, which assumes the two repositories are checked out beside each other.

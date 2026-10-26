@@ -78,16 +78,13 @@ _NOT_A_ROW = re.compile(r"^\|\s*(information\s*\||\s*:?-+:?\s*\|)", re.I)
 
 #: A node opens a `###` block and carries its id first: `### ch1-2 · check availability`.
 #: The id may be backticked or not; the separator may be `·`, `—` or `-`.
-#: A main flow's step is a whole flow named by its prefix (`spe1-sr5`), so its id may be a bare
-#: sigil — `### ado · bring plumb to a project` — and a bare word is read as an id only before `·`.
-_NODE = re.compile(
-    r"^###\s+`?([A-Za-z]+\d[\w.\-]*\d|[A-Za-z]+\d|[a-z]+(?=`?\s+·))`?\s*[·—-]?\s*(.*)$", re.M)
+_NODE = re.compile(r"^###\s+`?([A-Za-z]+\d[\w.\-]*\d|[A-Za-z]+\d)`?\s*[·—-]?\s*(.*)$", re.M)
 
 #: An id that is a decision or a parameter rather than a story, **where the node declares it**:
 #: `**Decision \`ch1-D1\` — the window closes at 02:00, so nothing may assume same-day.**`
 #:
 #: The run-in is what makes it a declaration. Matched anywhere in the block, this read every
-#: *mention* as one, so a closing paragraph citing another chapter's unknown — `ch3-U1`, `ent4-u1`,
+#: *mention* as one, so a closing paragraph citing another chapter's unknown — `ch3-U1`, `spe1-1-4-u1`,
 #: the ordinary way one node points at a decision another chapter owns — was reported as an id not
 #: namespaced to its chapter. The prose was right and the gate was wrong, and it fired the first
 #: time a converted chapter cited across chapters at all.
@@ -283,10 +280,6 @@ def _mermaid(text: str) -> str:
     return "\n".join(mermaid_blocks(text))
 
 
-#: The id a diagram gives a node: numbered and bold or bare, or a bold sigil on its own.
-_DRAWN_ID = r"(?:<b>\s*([a-z]+)\s*</b>|(?:<b>)?\s*([A-Za-z]+\d[\w.-]*))"
-
-
 def read_flow(text: str) -> tuple[dict, dict, tuple]:
     """``(edges, var -> node id, ids drawn as sub-flows)`` from the chapter's mermaid block."""
     mer = _mermaid(text)
@@ -300,9 +293,8 @@ def read_flow(text: str) -> tuple[dict, dict, tuple]:
     # in the chapter as "not in the flow" — four faults naming the wrong cause, and three real
     # gates off. Nothing documented the four, because nothing knew it was load-bearing.
     var2id = {}
-    # A bare sigil is an id only in bold, so the first word of an unbolded label never is one.
-    for m in re.finditer(rf"^[ \t]+(\w+)\s*[\[\({{>]+\s*{_DRAWN_ID}", mer, re.M):
-        var2id.setdefault(m.group(1), m.group(2) or m.group(3))
+    for m in re.finditer(r"^[ \t]+(\w+)\s*[\[\({>]+\s*(?:<b>)?\s*([A-Za-z]+\d[\w.-]*)", mer, re.M):
+        var2id.setdefault(m.group(1), m.group(2))
     edges: dict[str, set] = {}
     for line in mer.splitlines():
         line = re.sub(r"\|[^|]*\|", " ", line)          # edge labels are not node names
@@ -313,8 +305,8 @@ def read_flow(text: str) -> tuple[dict, dict, tuple]:
             if re.fullmatch(r"\w+", a) and re.fullmatch(r"\w+", b):
                 edges.setdefault(a, set()).add(b)
     subflows = tuple(sorted(
-        {m.group(1) or m.group(2) for m in
-         re.finditer(rf"^[ \t]+\w+\[\[\s*{_DRAWN_ID}", mer, re.M)}))
+        {m.group(1) for m in
+         re.finditer(r"^[ \t]+\w+\[\[\s*(?:<b>)?\s*([A-Za-z]+\d[\w.-]*)", mer, re.M)}))
     return edges, var2id, subflows
 
 
@@ -380,12 +372,11 @@ def read(path: Path) -> Chapter | None:
     return Chapter(Path(path), tuple(nodes), text, edges, var2id, subflows, flow_level)
 
 
-def faults(chapter: Chapter, prefix: str, in_flow: set, flows: set = frozenset()) -> list:
+def faults(chapter: Chapter, prefix: str, in_flow: set) -> list:
     """What is wrong with one node-format chapter.
 
     ``in_flow`` is the set of ids the chapter's process flow draws, so a node the flow does not
-    carry and a node drawn but never expanded are both nameable. ``flows`` are a main flow's steps
-    that are whole flows, named by those flows' prefixes rather than this chapter's (`spe1-sr5`).
+    carry and a node drawn but never expanded are both nameable.
 
     What a step moves is **not** checked against a list here. It is stated in the row that moves it,
     with a provenance, and what answers *does this arrive from anywhere* is the chain, the
@@ -427,7 +418,7 @@ def faults(chapter: Chapter, prefix: str, in_flow: set, flows: set = frozenset()
 
     seen, requirements_seen = set(), set()
     for node in chapter.nodes:
-        if not node.id.startswith(prefix) and node.id not in flows:
+        if not node.id.startswith(prefix):
             found.append(f"{name}#{node.id} is not namespaced to its chapter — expected "
                          f"{prefix}-<n>, so a citation from another chapter is never ambiguous")
         if node.id in seen:

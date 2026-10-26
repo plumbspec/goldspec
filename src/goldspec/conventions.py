@@ -84,7 +84,7 @@ class Conventions:
     flow_dir: str = FLOW_DIR
     #: Other spec directories of the same corpus — **resolved against, never checked**.
     #:
-    #: A namespace spans repositories (`cus2`) and so does the element corpus: this methodology's
+    #: A namespace spans repositories (`spe6-2-2`) and so does the element corpus: this methodology's
     #: chapter 7 consumes elements the tool's chapters 1 and 2 define, and the tool's chapter 0
     #: consumes one of ours. Run over either directory alone, four correct references read as
     #: consumed-and-defined-nowhere.
@@ -95,10 +95,10 @@ class Conventions:
     #: where they are the subject rather than the context. Unresolved *after* siblings is what
     #: `spe5` was always about.
     siblings: tuple = ()
-    #: The one flow the corpus starts from, by file name inside ``flow_dir`` (`spe1-ur5`). Its
-    #: steps are the corpus's other flows, each named by that flow's own prefix (`spe1-sr5`), and
-    #: once it is named every flow has to be reachable from it (`spe5-sr8`). Empty means the
-    #: corpus has not said, and reachability is not checked.
+    #: The one flow the corpus starts from, by file name inside ``flow_dir`` (`spe1-ur5`). Every
+    #: other flow is a drill-down named for the step it expands (`spe1-sr5`), and once the main flow
+    #: is named every flow has to be reachable from it (`spe5-sr8`). Empty means the corpus has not
+    #: said, and reachability is not checked.
     main_flow: str = ""
 
 

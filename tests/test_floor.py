@@ -1,4 +1,4 @@
-"""The Python this package declares it runs on, held against what it ships (`ent6`).
+"""The Python this package declares it runs on, held against what it ships (`spe1-1-6`).
 
 The command is a single archive that imports nothing outside the standard library, so a floor
 here is a promise about an adopter's machine that nothing else can keep. Read as source rather

@@ -486,12 +486,10 @@ def _beneath(top: Path, siblings) -> set:
 def expands(drawn: str, chapter) -> bool:
     """Whether ``chapter`` is the flow a sub-flow step ``drawn`` drills into.
 
-    A numbered step's flow nests under it with a hyphen — ``ch1-2`` into ``ch1-2-1``. A main flow's
-    step is named by a flow's own prefix (`spe1-sr5`), and a sigil's steps follow it directly —
-    ``ado`` into ``ado1`` — so a flow takes its place under the main flow with no id changing.
+    Its flow is named for it and nests under it with a hyphen — ``ch1-2`` into ``ch1-2-1``
+    (`spe1-sr5`).
     """
-    tail = r"\d+" if drawn.isalpha() else r"-[a-z]?\d+"
-    return any(re.fullmatch(rf"{re.escape(drawn)}{tail}", n.id) for n in chapter.nodes)
+    return any(re.fullmatch(rf"{re.escape(drawn)}-[a-z]?\d+", n.id) for n in chapter.nodes)
 
 
 def review(path: Path, siblings=(), prefix: str | None = None) -> list[str]:

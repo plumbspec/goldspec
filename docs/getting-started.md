@@ -139,16 +139,19 @@ at the ceiling. That is a thing you notice rather than decide.
 its steps, or as a step of a flow under it, or linked from one that is. A reader starting at the
 top can then find every chapter, and a flow nobody reaches is one nobody will read.
 
-The main flow's steps are whole flows, so each is **named by that flow's own prefix**: `ch2` for the
-flow whose steps are `ch2-1`, `ch2-2`; `ado` for a flow named by sigil, whose steps are `ado1`,
-`ado2`. Draw it bold, as a sub-flow — `ADO[[<b>ado</b> · bring the tool to a project]]:::subroutine`
-— and give it an ordinary `### ado · …` block whose Information table says what crosses into and
-out of that flow. Nothing is renumbered to sit under it, and the boundary is checked like any other
-sub-flow's.
+**Every other flow is a drill-down of the step it is entered from, and is named for that step.**
+A flow entered at `ch1-3` is `chapter-01.3-….md` (or `ch1-3-….md` in a corpus named by sigil),
+and its steps are `ch1-3-1`, `ch1-3-2`. Where a step needs a whole process beside it rather than
+inside it, give that process a step of its own next to it — `ch1-3-1`, drawn as a sub-flow — and
+name its chapter for that. The file names alone then show the tree, and nobody has to open a file
+to find out where it sits. A second root, named for nothing in the tree, is the sprawl this rule
+is there to prevent.
 
 Name it in your conventions with `main_flow`, and the gate holds the rest: a flow neither drawn from
 it nor linked from a flow that is is a fault. A flow entered from several places — the same
 hand-over used by more than one step — is linked from where it is entered rather than drawn twice.
+A flow that is only ever linked, and drawn nowhere, is legitimate, but it is usually a sign that the
+work is being handed off to another business process.
 
 ---
 
@@ -731,7 +734,7 @@ to get wrong:
   the file passes. What may follow the version is not a closed set either, whatever it looks like.
 - **Altitude**, which is why a word-by-word read has not been retired.
 
-**A fault may cite an id of goldspec's own spec** — `` (`spe6`) `` on the stamp, `(alt4)` on the
+**A fault may cite an id of goldspec's own spec** — `` (`spe6`) `` on the stamp, `(spe6-1-4)` on the
 start-and-end check. Those name the subject inside this methodology's own chapters that the check
 comes from. They are a pointer for whoever maintains the gate; nothing about your chapter depends
 on being able to resolve one, and you can read straight past them.
@@ -754,7 +757,7 @@ namespace = "ord"              # ids read ord1-1, ord1-2
 flow_dir  = "flows"            # where the process flows live, relative to the spec
 flow_glob = "story-*.md"       # how a flow file is named
 siblings  = ["../shared/spec"] # more of this corpus, read for what it defines, never checked
-main_flow = "story-00-shop.md" # the one flow the corpus starts from — see "One main flow"
+main_flow = "story-01-orders.md" # the one flow the corpus starts from — see "One main flow"
 ```
 
 Every key is optional, and the defaults are our habits: `namespace = "ch"`, `flow_dir = "diagrams"`,

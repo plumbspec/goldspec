@@ -67,7 +67,7 @@ namespace = "sh"                  # the prefix every subject id carries
 flow_dir  = "diagrams"            # where the process flows live, relative to the spec
 flow_glob = "chapter-*.md"        # how a flow file is named
 siblings = ["../other/spec"]      # more of this corpus, read for what it defines, never checked
-main_flow = "chapter-00-shop.md"  # the one flow the corpus starts from; every flow must be reached from it
+main_flow = "chapter-01-ordering.md" # the one flow the corpus starts from; every flow must be reached from it
 ```
 
 **A chapter is held to the shape it is written in.** Written as a flow, its information lives with

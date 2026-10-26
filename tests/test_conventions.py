@@ -132,7 +132,7 @@ def test_the_command_reads_the_projects_file(tmp_path, capsys):
 
 
 def test_the_command_names_the_conventions_it_judged_by(tmp_path, capsys):
-    """Printed on every run, and on stderr so stdout stays exactly the gate's report (`vie7`).
+    """Printed on every run, and on stderr so stdout stays exactly the gate's report (`spe6-3-7`).
 
     Every fault the command can print is phrased as a verdict on the spec. Where the real cause is a
     convention mismatch, nothing in that output lets the reader suspect it — which is how a wrong

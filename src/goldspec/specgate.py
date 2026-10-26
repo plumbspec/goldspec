@@ -164,11 +164,7 @@ def _chapter_prefix(md: Path, conv: Conventions) -> str:
     # rather than its sigil — `developer-day.md` carries `dev00`..`dev11`, and taking the first
     # word gave `developer`, under which every id in the file is not namespaced to its own chapter.
     named = re.match(rf"(?:{conv.namespace})(?:\d+(?:-\d+)*)?", md.name)
-    if named:
-        return named.group(0)
-    # A main flow named for no sigil has no steps of its own to namespace: every step is another
-    # flow, named by that flow's prefix (`spe1-sr5`).
-    return "" if conv.main_flow and md.name == conv.main_flow else conv.namespace
+    return named.group(0) if named else conv.namespace
 
 
 def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None = None) -> Report:
@@ -242,7 +238,7 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
                     f"citation to a subject nobody wrote down reads as authoritative as any other")
 
 
-    # `alt4` — a flow is closed and reachable from its start, which presumes it has one. Derived
+    # `spe6-1-4` — a flow is closed and reachable from its start, which presumes it has one. Derived
     # from the edges rather than from a shape somebody remembered to draw: a start is a node nothing
     # points at, an end is a node pointing at nothing. A flow with neither is a diagram of a cycle,
     # and a reader cannot tell where it begins or what it arrives at.
@@ -256,11 +252,11 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
             if not starts:
                 report.problems.append(
                     f"{md.name}: the flow has no start — every node is pointed at by another, so "
-                    "nothing says where it begins (alt4)")
+                    "nothing says where it begins (spe6-1-4)")
             if not ends:
                 report.problems.append(
                     f"{md.name}: the flow has no end — every node points at another, so nothing "
-                    "says what it arrives at (alt4)")
+                    "says what it arrives at (spe6-1-4)")
 
     rendering = faults(_flow_files(spec, conv))
     report.problems += rendering
@@ -342,14 +338,6 @@ def _review(spec: Path, conv: Conventions, report: Report) -> None:
             report.checked += [f"  {line}" for line in seen]
 
 
-def _flows_drawn(chapter, chapters: dict) -> set:
-    """The sub-flow steps of ``chapter`` that another chapter expands."""
-    from goldspec.review import expands
-
-    return {d for d in chapter.subflows
-            if any(c is not chapter and expands(d, c) for c in chapters.values())}
-
-
 def _nodes(spec: Path, conv: Conventions, report: Report) -> None:
     """The chapters written as flows, over the whole spec at once.
 
@@ -388,10 +376,8 @@ def _nodes(spec: Path, conv: Conventions, report: Report) -> None:
         # Off the parsed chapter, never off the markdown again: the diagram had two readers and
         # they disagreed about which ids it draws, so a check could read an empty set and pass
         # without comparing anything.
-        # A main flow's steps that are whole flows carry those flows' prefixes, not its own.
-        flows = _flows_drawn(chapter, converted) if path.name == conv.main_flow else set()
-        drawn = {i for i in chapter.var2id.values() if i.startswith(prefix)} | flows
-        found = node_format.faults(chapter, prefix, drawn, flows)
+        drawn = {i for i in chapter.var2id.values() if i.startswith(prefix)}
+        found = node_format.faults(chapter, prefix, drawn)
         report.problems += found
 
 

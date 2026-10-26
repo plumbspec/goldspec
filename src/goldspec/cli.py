@@ -43,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(str(bad))
 
     # Which strings this run judged the spec by, on stderr so stdout stays exactly the gate's report
-    # (`vie7`). Printed on every run, including the clean ones: every fault this command can report
+    # (`spe6-3-7`). Printed on every run, including the clean ones: every fault this command can report
     # is phrased as a verdict on the spec, and where the real cause is a convention mismatch the
     # reader has no way to suspect it. Naming the basis is what makes a wrong verdict diagnosable
     # instead of a reason to conclude the method does not fit.
@@ -57,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     report = check_spec_directory(spec, conv, cited_from=spec.parent)
 
     # What the run actually read, on stderr beside the conventions and for the same reason: stdout
-    # is exactly the gate's problems and their count (`vie7`), and a line of context there would be
+    # is exactly the gate's problems and their count (`spe6-3-7`), and a line of context there would be
     # a view stating something its source does not.
     #
     # Printed at all because `Report.checked` says of itself that it matters as much as `problems`
