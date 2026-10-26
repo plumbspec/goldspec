@@ -1,6 +1,6 @@
 # vie · answer an audience
 
-**Last updated** 2026-09-14 v1
+**Last updated** 2026-10-26 v2
 
 What somebody does to answer one of the several audiences a plan has — an executive reading budget
 and schedule, whoever asks what is actually in place, whoever asks what a change would cost —
@@ -263,15 +263,9 @@ flowchart TD
 |---|---|
 | View | A projection of the spec for an audience — a roll-up, a flow, a trace table. Derived on demand, never authored or maintained. |
 | Overlay | Planning facts the spec does not own because nothing can prove them, keyed by subject and joined at view time. Additive only. |
-| Actual plan | Not an artifact: the ideal read together with its derived status, where the unproven subjects are what is not yet in place. |
 | Required depth | What a team expects a subject to reach. Authored in the overlay, compared against what was achieved, never imposed. |
 | View provenance | Which spec, which run, which overlay, and when — stamped on every rendering. |
 | Assertion | What a view says. May summarise and omit; may never exceed its source. |
-| Provenance | Where an input came from, or how an output was made. |
-| Authored | Written by a person. An input nothing produces, or an output somebody typed. |
-| Derived | Computed by this step from what it took in. |
-| Observed | Read off a run, a tree or the world as it stands. |
-| Parent | On a sub-flow's input: handed in by the chapter this one drills into. |
 
 ---
 

@@ -1,6 +1,6 @@
 # alt · weigh an alternative
 
-**Last updated** 2026-09-14 v1
+**Last updated** 2026-10-26 v2
 
 What somebody does to explore a different approach without copying the plan, and to find out what
 both approaches need before choosing between them. Reads the flows
@@ -12,14 +12,14 @@ flowchart TD
 
     VARIANT[<b>alt1</b> · express a what-if as a flow over the same subjects]:::process
     OVERLAP[<b>alt2</b> · derive what every alternative needs, and where they diverge]:::process
-    CAND[<b>alt3</b> · surface overlap as candidates, never verdicts]:::process
+    CAND[<b>alt3</b> · surface suspected duplicates, never verdicts]:::process
     GATE[<b>alt4</b> · gate a flow nobody has adopted yet]:::process
     DISPOSE[<b>alt5</b> · dispose of every capability the old flow had]:::process
 
     OUT([<b>END</b> · what is safe to build today, and a dated,<br/>located decision for the rest]):::good
 
     IN --> VARIANT --> OVERLAP --> CAND --> GATE --> DISPOSE --> OUT
-    GATE -->|not closed, or claims an overlap it does not remove| VARIANT
+    GATE -->|not closed, or keeps a duplicate it claimed to remove| VARIANT
 
     classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;
     classDef process fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;
@@ -87,7 +87,7 @@ flowchart TD
 
 ---
 
-### alt3 · surface overlap as candidates, never verdicts
+### alt3 · surface suspected duplicates, never verdicts
 
 > **As somebody being told two parts of my plan might be the same thing I want that offered as a
 > suspicion, so that a guess never arrives wearing the authority of a proof.**
@@ -97,7 +97,7 @@ flowchart TD
 | Information | IO | Description | Required | Provenance |
 |---|---|---|---|---|
 | alt3-inf1 | In | `flow` | yes | parent |
-| alt3-inf2 | Out | `overlap_candidate` | yes | derived |
+| alt3-inf2 | Out | `duplicate_candidate` | yes | derived |
 
 #### User Requirements
   * alt3-ur1 - a mechanical pass surfaces candidates: two flows producing one output, two
@@ -113,7 +113,7 @@ flowchart TD
   * alt3-nfr1 - a heuristic permitted to look like a proof is this method's own failure mode
 
 #### Unknowns
-  * alt3-u1 - a detector that cries overlap too often trains its reader to dismiss it, and no bar
+  * alt3-u1 - a detector that cries duplicate too often trains its reader to dismiss it, and no bar
     is defined for how sure a candidate must be before it is worth raising — a heuristic nobody
     trusts and a heuristic nobody runs are the same heuristic
 
@@ -130,12 +130,12 @@ flowchart TD
 | Information | IO | Description | Required | Provenance |
 |---|---|---|---|---|
 | alt4-inf1 | In | `flow` | yes | parent |
-| alt4-inf2 | In | `overlap_candidate` | yes | alt3 |
+| alt4-inf2 | In | `duplicate_candidate` | yes | alt3 |
 | alt4-inf3 | Out | `flow_completeness` | yes | derived |
 
 #### User Requirements
-  * alt4-ur1 - the same closure and overlap checks run against a flow nobody has accepted yet
-  * alt4-ur2 - a proposal that fails closure, or fails to reduce the overlap it claimed to
+  * alt4-ur1 - the same closure and duplicate checks run against a flow nobody has accepted yet
+  * alt4-ur2 - a proposal that fails closure, or keeps a duplicate it claimed to
     remove, is rejected
 
 #### System Requirements
@@ -147,7 +147,7 @@ flowchart TD
 
 #### Unknowns
   * alt4-u1 - whether the closure properties known to matter are the whole set is not established;
-    each was found by a flow failing in a way nobody anticipated
+    settled by a flow failing closure in a way none of them names
 
 ---
 
@@ -185,19 +185,15 @@ flowchart TD
 | Alternative | Another flow over the same subjects, expressing a what-if without duplicating the plan. |
 | Overlap | What every declared alternative requires — derived, and safe to build before the choice is made. |
 | Divergence point | Where alternatives stop agreeing: the located, dated decision a what-if reduces to. |
-| Overlap candidate | A mechanically surfaced suspicion that two flows or subjects cover the same ground. Never a verdict, never a status. |
-| Complete flow | A flow that is closed: reachable from its start, terminating on every path, carrying every subject declared for it, and leaving no decision arm unhandled. |
+| Duplicate candidate | A mechanically surfaced suspicion that two flows or subjects cover the same ground. Never a verdict, never a status. |
+| Closed flow | Reachable from its start, terminating on every path, every declared step placed, every decision arm handled. |
 | Disposition | What a redesign did with a capability that existed before it: kept, replaced by a named element, or deliberately eliminated. |
-| Provenance | Where an input came from, or how an output was made. |
-| Authored | Written by a person. An input nothing produces, or an output somebody typed. |
-| Derived | Computed by this step from what it took in. |
-| Parent | On a sub-flow's input: handed in by the chapter this one drills into. |
 
 ---
 
 ## Working notes — not part of the chapter
 
 **alt3 and alt2 look alike and are not.** alt2's overlap is an exact intersection over declared
-alternatives — arithmetic, and safe to act on. alt3's is a suspicion that two things nobody declared
+alternatives — arithmetic, and safe to act on. alt3's duplicate is a suspicion that two things nobody declared
 related might be one thing. Keeping them as separate steps is what stops the second borrowing the
 first's authority, which is alt3-nfr1 stated structurally rather than only in prose.

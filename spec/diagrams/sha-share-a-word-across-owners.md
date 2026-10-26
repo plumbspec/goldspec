@@ -1,11 +1,10 @@
 # sha · share a word across owners
 
-**Last updated** 2026-10-26 v2
+**Last updated** 2026-10-26 v3
 
 What technical staff do when two teams' specs define the same word: settle it where one of them
 owns both sides, and where neither does, say what the two words mean to each other without either
-team being made to rewrite theirs. Two business units may use one word for different things, and
-that is theirs to do. Entered from [cus · keep the corpus](cus-keep-the-corpus.md), where the
+team being made to rewrite theirs. Two business units may use one word for different things. Entered from [cus · keep the corpus](cus-keep-the-corpus.md), where the
 corpus holding both specs shows the shared word.
 
 ```mermaid
@@ -130,7 +129,8 @@ flowchart TD
 ### sha4 · declare the agreement nothing can detect
 
 > **As whoever integrates two teams I want the case where both specs agree and the meanings differ
-> to be written down by somebody, because no check will ever raise it.**
+> written down by somebody, so that the one disagreement no check can raise is still on record when
+> the two teams' code meets.**
 
 #### Information
 
@@ -160,13 +160,10 @@ flowchart TD
 
 | Term | Meaning |
 |---|---|
-| Name conflict | One name, two definitions that disagree. A fact rather than a candidate, which is what separates it from an overlap. |
+| Name conflict | One name, two definitions that disagree. A fact rather than a candidate, which is what separates it from a duplicate candidate. |
 | Synonym candidate | Two names that agree in every respect a check can compare. A candidate, and it stays a judgement. |
 | Mapping | An entry between two namespaces for a name they both define. Owned by neither, carrying a verdict a gate requires and never judges. |
 | Verdict | What a mapping says the two names mean to each other: one subject, two subjects, or an agreed word over different meanings. |
-| Provenance | Where an input came from, or how an output was made. |
-| Authored | Written by a person. An input nothing produces, or an output somebody typed. |
-| Parent | On a sub-flow's input: handed in by the chapter this one drills into. |
 
 ---
 

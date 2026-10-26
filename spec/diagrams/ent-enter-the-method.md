@@ -1,6 +1,6 @@
 # ent · enter the method
 
-**Last updated** 2026-09-15 v4
+**Last updated** 2026-10-26 v5
 
 What a team with years of specifications in whatever shape they accumulated does to start using
 this method on them — without hand-converting everything first, and without a day where nothing
@@ -17,7 +17,7 @@ flowchart TD
     OWN[<b>ent3</b> · let each spec own its domain outright]:::process
     ADD[<b>ent4</b> · add to a spec without forking it]:::process
     CONV[<b>ent5</b> · convert one chapter, renumbering nothing]:::process
-    HELD[<b>ent6</b> · declare what this project is held to]:::process
+    HELD[<b>ent6</b> · judge each chapter by the shape it is written in]:::process
 
     OUT([<b>END</b> · a corpus the gates read, converted<br/>as far as the team has got]):::good
 
@@ -54,8 +54,7 @@ flowchart TD
   * ent1-ur1 - the pass records what it changed, in the same shape as any other change report
   * ent1-ur2 - the ids a corpus arrived with are kept, so entering costs nobody a re-minted
     corpus
-  * ent1-ur3 - the pass is reversible, and says so where somebody deciding whether to try it
-    will read it
+  * ent1-ur3 - the pass is reversible, as cus6 holds
 
 #### System Requirements
   * ent1-sr1 - the pass is bounded and reported: what it read, what it changed, and what it
@@ -71,8 +70,9 @@ flowchart TD
 
 ### ent2 · state what the corpus is
 
-> **As a gate reading half a corpus I want the spec to say where the rest of it is, so that I can
-> tell a correct reference to a neighbour from a reference to nothing.**
+> **As somebody whose spec cites a neighbouring one I want my spec to say where the rest of the
+> corpus is, so that a correct reference to a neighbour is never reported as a reference to
+> nothing.**
 
 #### Information
 
@@ -121,8 +121,7 @@ flowchart TD
     contract is stated from both sides
 
 #### System Requirements
-  * ent3-sr1 - a name defined in two specs demands an entry saying what the two mean to each
-    other
+  * ent3-sr1 - a name defined in two specs is reconciled as sha3 requires
 
 #### Non-Functional Requirements
   * ent3-nfr1 - several specs are one truth by that rule, never by anybody remembering which
@@ -190,7 +189,8 @@ flowchart TD
   * ent5-ur4 - a chapter is brought to the current shape when it is touched
 
 #### System Requirements
-  * ent5-sr1 - the kind-finding half runs last
+  * ent5-sr1 - a chapter is moved into the current shape first, and its claims are read for
+    their kinds after
 
 #### Non-Functional Requirements
   * ent5-nfr1 - a corpus may be half converted for as long as its owner likes
@@ -200,7 +200,7 @@ flowchart TD
 
 ---
 
-### ent6 · declare what this project is held to
+### ent6 · judge each chapter by the shape it is written in
 
 > **As the owner of a corpus written before this format I want a chapter judged by the shape it is
 > written in, so that converting is something I can start on a Tuesday with one chapter.**
@@ -211,7 +211,7 @@ flowchart TD
 |---|---|---|---|---|
 | ent6-inf1 | In | `fault` | yes | parent |
 | ent6-inf2 | In | `conventions` | yes | ent2 |
-| ent6-inf3 | Out | `conventions.held` | yes | authored |
+| ent6-inf3 | Out | `chapter.shape` | yes | derived |
 
 #### User Requirements
   * ent6-ur1 - a chapter is held to the shape it is written in; one in an older shape is read
@@ -242,10 +242,6 @@ flowchart TD
 | Extension | A spec that declares a base and adds to it. Additive only, never restating, and meaningless without the base it names. |
 | Base | The spec an extension builds on. Stands alone, and never cites what extends it. |
 | Migration | One audited, reported, reversible pass over a corpus that predates the method. |
-| Provenance | Where an input came from, or how an output was made. |
-| Authored | Written by a person. An input nothing produces, or an output somebody typed. |
-| Derived | Computed by this step from what it took in. |
-| Parent | On a sub-flow's input: handed in by the chapter this one drills into. |
 
 ---
 

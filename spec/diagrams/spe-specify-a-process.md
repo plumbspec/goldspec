@@ -1,6 +1,6 @@
 # spe · specify a process
 
-**Last updated** 2026-10-26 v6
+**Last updated** 2026-10-26 v7
 
 What somebody who owns a process does to write it down, so that what they decided can be argued
 with and what they left out can be found. This is the method's main flow: every other flow is one
@@ -8,8 +8,7 @@ of its steps. A team with specifications already written enters through
 [ent · enter the method](ent-enter-the-method.md); another approach to a stamped flow is weighed in
 [alt · weigh an alternative](alt-weigh-an-alternative.md); what this produces is held by
 [cus · keep the corpus](cus-keep-the-corpus.md); where two owners' specs define one word, technical
-staff reconcile it in [sha · share a word across owners](sha-share-a-word-across-owners.md), and
-nobody's chapter is failed for it; and [vie · answer an audience](vie-answer-an-audience.md) reads
+staff reconcile it in [sha · share a word across owners](sha-share-a-word-across-owners.md); and [vie · answer an audience](vie-answer-an-audience.md) reads
 the result.
 
 ```mermaid
@@ -144,8 +143,8 @@ flowchart TD
   * spe2-ur1 - every step is one story: *as a role I want something so that a goal*
   * spe2-ur2 - the *so that* is the person's benefit and never the system's achievement
   * spe2-ur3 - a step drawn and never expanded, and a block no box reaches, are both named
-  * spe2-ur4 - the role is a role somebody holds, never somebody defined by their relationship to
-    this document
+  * spe2-ur4 - the role is somebody who needs what the step does, never "the reader of this
+    chapter" standing in for them
   * spe2-ur5 - every step of one chapter describes an act at the same altitude
 
 #### System Requirements
@@ -177,7 +176,7 @@ flowchart TD
 | spe3-inf3 | Out | `information_row.provenance` | yes | authored |
 | spe3-inf4 | Out | `information_row.required` | yes | authored |
 | spe3-inf5 | Out | `glossary_entry` | yes | authored |
-| spe3-inf6 | Out | `drilldown` | optional | authored |
+| spe3-inf6 | Out | `technical_definition` | optional | authored |
 
 #### User Requirements
   * spe3-ur1 - what a step takes and leaves is stated in the step's own rows
@@ -189,8 +188,7 @@ flowchart TD
 #### System Requirements
   * spe3-sr1 - provenance is one of: a step of this flow, `parent`, `authored`, `observed`,
     `generated`, or `derived`
-  * spe3-sr2 - `observed` is a measurement taken by watching a run, and carries the instrument
-    that made it
+  * spe3-sr2 - `observed` is read off a run, or off the world as it stands
   * spe3-sr3 - `generated` is minted rather than recomputed
   * spe3-sr4 - the column answers *if this were lost, could it be got back*
   * spe3-sr5 - types, lengths, keys and nullability live in a document behind the step
@@ -276,11 +274,11 @@ flowchart TD
   * spe5-sr2 - a check that cannot read the file reports that it could not, never that it passed
   * spe5-sr3 - inputs a nested chapter takes from its parent are read against the parent, not
     reported as unproduced
-  * spe5-sr6 - a required input is checked against the steps the flow actually reaches it from,
-    along the paths that do not loop; a back-edge is legal, so *upstream* is only defined there
   * spe5-sr4 - a step states its constraints under the five headings, in one order; a heading
     dropped or moved is a fault
   * spe5-sr5 - a requirement is named for the step it is stated under, and an id is stated once
+  * spe5-sr6 - a required input is checked against the steps the flow actually reaches it from,
+    along the paths that do not loop; a back-edge is legal, so *upstream* is only defined there
   * spe5-sr7 - a name and its dotted parts are one thing at two grains, and the relation runs one
     way per question: a step producing the whole SUPPLIES a step taking a part, and a step taking a
     part READS a step producing the whole. Neither reverses — producing a part does not supply a
@@ -294,11 +292,8 @@ flowchart TD
   * spe5-nfr1 - a gate reports what it can decide and never what it would have to judge
   * spe5-nfr2 - evidence is never authored — asserting a document says something proves only
     that somebody wrote it
-  * spe5-nfr3 - the direction is the whole of the rule, and stating it nowhere let two checks
-    implement it oppositely: one held that a consumed part justifies producing the whole, the other
-    that consuming the whole counts as consuming every part. They answered the same question about
-    one element with different verdicts, and the fault surfaced in a chapter whose author had not
-    touched it
+  * spe5-nfr3 - the direction is stated once, so no two checks can answer the same question about
+    one element differently
 
 #### Unknowns
   * spe5-u1 - a stated constraint and the code that enforces it can still drift, and nothing
@@ -336,8 +331,8 @@ flowchart TD
   * spe6-nfr2 - a save time is not a substitute for a commit
 
 #### Unknowns
-  * spe6-u1 - the version is not left-padded, so a chapter revised more than nine times in one day
-    sorts wrong against its own ordering rule
+  * spe6-u1 - whether the version is padded so a plain sort orders it, or a chapter is ordered by
+    its date and then its version as a number
 
 ---
 
@@ -444,26 +439,18 @@ flowchart TD
 | Provenance | Where an input came from, or how an output was made. |
 | Authored | Written by a person. An input nothing produces, or an output somebody typed. |
 | Derived | Computed by this step from what it took in. |
-| Observed | Read off a run, a tree or the world as it stands. |
+| Observed | Read off a run, or off the world as it stands. |
 | Generated | Made by a tool rather than by a person, and not recomputable. |
 | Main flow | The one flow a corpus starts from. Its steps are the corpus's other flows, named by their own prefixes. |
-| Parent | On a sub-flow's input: handed in by the chapter this one drills into. |
+| Parent | On a sub-flow's input: handed in by the chapter that drills into this one. |
 | Requirement | A constraint with an id, on the step it constrains — what the person needs, what the system must do, or what holds whatever the design. |
 | Open unknown | Something nobody has decided, with what would settle it, hanging off the step it affects. |
-| Drill-down | A document behind a step carrying the technical definition, so a chapter stays in the language of the work. |
+| Technical definition | A document behind a step carrying types, keys and formats, so a chapter stays in the language of the work. |
 | Fault | What a gate found. Names the file, the id, and what to do about it. |
 
 ---
 
 ## Working notes — not part of the chapter
-
-**What the format lost, and why each loss is a claim rather than a tidy-up.** The chapter-level
-element table is gone: information is stated in the row that raises the question, with its
-provenance, which is what lets a step be read alone (spe3-ur1). The closing argument is gone: what
-it carried is requirements with ids (spe4-nfr1), which closes the question of prose nothing can
-cite. `Held` is gone as a column and survives as spe3-nfr1. Type, cardinality, domain and whether
-anything enforces a domain moved behind the step (spe3-sr5) — in a chapter they made the chapter
-the builder's rather than the owner's.
 
 **The gates that survive are the ones with an invariant.** spe5's requirements are the review set:
 chain, unconsumed, provenance, closure, restatement. What cannot be checked — altitude, whether a

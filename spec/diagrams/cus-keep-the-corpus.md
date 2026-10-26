@@ -1,6 +1,6 @@
 # cus · keep the corpus
 
-**Last updated** 2026-10-26 v3
+**Last updated** 2026-10-26 v4
 
 What somebody responsible for a body of specifications does to keep it citable for as long as
 anything points at it: hold it in one authority, name its subjects so the name outlives the number,
@@ -18,16 +18,19 @@ flowchart TD
     HOLD[<b>cus3</b> · hold the corpus in one authority]:::process
     CLASS[<b>cus4</b> · classify a change, ratify it, record it]:::process
     LIN[<b>cus5</b> · record what a claim was replaced by]:::process
+    KEEPQ{keep the corpus,<br/>or reverse the adoption?}:::question
     BACK[<b>cus6</b> · hand the corpus back exactly as it arrived]:::process
 
     OUT([<b>END</b> · a citation written today still resolves<br/>to the right thing in ten years]):::good
     GONE([<b>END</b> · the original files, byte for byte —<br/>the decision to adopt, reversed]):::good
 
-    IN --> DRAFT --> MINT --> HOLD --> CLASS --> LIN --> OUT
-    HOLD --> BACK --> GONE
+    IN --> DRAFT --> MINT --> HOLD --> KEEPQ
+    KEEPQ -->|keep it| CLASS --> LIN --> OUT
+    KEEPQ -->|reverse the adoption| BACK --> GONE
 
     classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;
     classDef process fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;
+    classDef question fill:#fdf3d8,stroke:#b8860b,color:#0b0b0b;
     classDef good fill:#e2f2e2,stroke:#0ca30c,color:#0b0b0b;
 ```
 
@@ -52,10 +55,10 @@ flowchart TD
   * cus1-ur3 - a draft may be complete and internally consistent while carrying nothing permanent
 
 #### System Requirements
-  * cus1-sr1 - an id minted at authoring time welds identity to position, which is what makes
-    insertion expensive
 
 #### Non-Functional Requirements
+  * cus1-nfr1 - an id minted at authoring time welds identity to position, which is what makes
+    insertion expensive
 
 #### Unknowns
   * cus1-u1 - whether the provisional-then-assigned split is worth its ceremony below institutional
@@ -91,7 +94,7 @@ flowchart TD
 
 #### System Requirements
   * cus2-sr1 - the key is time-sortable, so an ordering survives without a central counter
-  * cus2-sr2 - a label nests no deeper than the bound the corpus declares
+  * cus2-sr2 - a label nests no deeper than `cus-P1`
   * cus2-sr3 - renumbering is one audited pass: rename one subject and every citation to it moves
     at once
 
@@ -99,10 +102,10 @@ flowchart TD
   * cus2-nfr1 - identity and legibility are different jobs and one token does not do both
 
 #### Unknowns
-  * cus2-u1 - how deep a composition may nest before a citation stops being said correctly is not
-    measured; the working value is four, and what would settle it is transcription error rate
-    against depth over citations copied by hand between documents
 
+**Parameter `cus-P1` — how deep a label may nest before a citation stops being said correctly.
+Working value four; confirmed by the transcription error rate against depth, over citations copied
+by hand between documents.**
 
 ---
 
@@ -130,9 +133,8 @@ flowchart TD
     displays, what a reviewer reads, and the most that is ever handed outside the method
   * cus3-ur4 - the file says which version wrote it, and a file carrying no stamp is read as the
     version it structurally is
-  * cus3-ur5 - a word two owners' specs both define is handed to the technical staff who reconcile
-    it (sha), and neither owner's spec is failed or changed for it — two business units may use one
-    word for different things
+  * cus3-ur5 - a word two owners' specs both define is handed to sha, and neither owner's spec is
+    failed or changed for it
 
 #### System Requirements
   * cus3-sr1 - the store lives in the adopter's own repository as plain text, reviewable in a pull
@@ -228,12 +230,11 @@ flowchart TD
 
 #### User Requirements
   * cus6-ur1 - import then export returns the original files byte for byte
-  * cus6-ur2 - reversibility is a property of the tool, stated where somebody deciding whether
-    to adopt will read it
+  * cus6-ur2 - reversibility is stated where somebody deciding whether to adopt will read it
 
 #### System Requirements
-  * cus6-sr1 - the round trip is the cheapest correctness test the method has — import, export,
-    diff, expect nothing
+  * cus6-sr1 - the round trip is checkable by importing, exporting and comparing, and the
+    comparison comes back empty
 
 #### Non-Functional Requirements
   * cus6-nfr1 - a method that can hold a corpus hostage will not be let near one that matters
@@ -245,7 +246,8 @@ flowchart TD
 
 | Term | Meaning |
 |---|---|
-| Subject | The thing a citation names — a step, a decision, an unknown. |
+| Subject | The thing a citation names — a step, a decision, a parameter, an unknown. |
+| Claim | What a subject says: the sentence a citation is held against. |
 | Permanent key | The identity a subject keeps forever: opaque, assigned once, never reissued. Nothing a human types. |
 | Label | The citation a human reads and writes. Several may point at one subject, and one may be retired and reissued, because nothing resolves through it. |
 | Provisional reference | A marked reference in a draft, before identity has been assigned. Resolvable only inside its own draft. |
@@ -254,10 +256,6 @@ flowchart TD
 | Claim digest | The content address of a normalised claim, recorded by a citation so a rewritten claim does not stay green. |
 | Lineage | Supersession, splitting and merging, held as relations between subjects rather than as prose. |
 | Round trip | Import then export, returning the original files byte for byte. |
-| Provenance | Where an input came from, or how an output was made. |
-| Authored | Written by a person. An input nothing produces, or an output somebody typed. |
-| Derived | Computed by this step from what it took in. |
-| Generated | Made by a tool rather than by a person, and not recomputable. |
 
 ---
 

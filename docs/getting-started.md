@@ -411,9 +411,8 @@ Under the Information table, four headings, always in this order and always pres
       * ch1-2-u1 - how long a reservation is held is not measured
 
 **A bullet is `  * <id> - <what it requires>`**, with a hyphen between the id and the text. Not a
-colon, not an em dash: the separator is what the parser reads, and a bullet written another way
-used to parse as nothing at all — so the requirement was held to no check, on a line that looks
-exactly right. The gate names one now rather than passing over it.
+colon, not an em dash: the separator is what the parser reads, and the gate names a bullet written
+another way rather than passing over it.
 
 **A constraint is a requirement with an id, on the step it constrains.** There is no chapter-level
 list of them — that would move a constraint away from the thing it constrains.
