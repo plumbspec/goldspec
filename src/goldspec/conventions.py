@@ -95,6 +95,11 @@ class Conventions:
     #: where they are the subject rather than the context. Unresolved *after* siblings is what
     #: `spe5` was always about.
     siblings: tuple = ()
+    #: The one flow the corpus starts from, by file name inside ``flow_dir`` (`spe1-ur5`). Its
+    #: steps are the corpus's other flows, each named by that flow's own prefix (`spe1-sr5`), and
+    #: once it is named every flow has to be reachable from it (`spe5-sr8`). Empty means the
+    #: corpus has not said, and reachability is not checked.
+    main_flow: str = ""
 
 
 def find_config(spec: Path) -> Path | None:

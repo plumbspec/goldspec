@@ -164,7 +164,11 @@ def _chapter_prefix(md: Path, conv: Conventions) -> str:
     # rather than its sigil — `developer-day.md` carries `dev00`..`dev11`, and taking the first
     # word gave `developer`, under which every id in the file is not namespaced to its own chapter.
     named = re.match(rf"(?:{conv.namespace})(?:\d+(?:-\d+)*)?", md.name)
-    return named.group(0) if named else conv.namespace
+    if named:
+        return named.group(0)
+    # A main flow named for no sigil has no steps of its own to namespace: every step is another
+    # flow, named by that flow's prefix (`spe1-sr5`).
+    return "" if conv.main_flow and md.name == conv.main_flow else conv.namespace
 
 
 def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None = None) -> Report:
@@ -263,7 +267,43 @@ def check_spec_directory(spec: Path, conv: Conventions, cited_from: Path | None 
     report.checked.append(f"{len(_flow_files(spec, conv))} process flow(s) render")
     _nodes(spec, conv, report)
     _review(spec, conv, report)
+    _reached(spec, conv, report)
     return report
+
+
+def _reached(spec: Path, conv: Conventions, report: Report) -> None:
+    """Every flow reachable from the main flow, where the corpus names one (`spe5-sr8`).
+
+    Reached means drawn as a sub-flow of a reached flow, or linked from one. A flow standing beside
+    the main flow and reached by neither is a chapter no reader starting at the top will find.
+    """
+    from goldspec import nodes as node_format
+    from goldspec.review import expands
+
+    if not conv.main_flow:
+        return
+    flows = {p.name: p for p in _flow_files(spec, conv)}
+    if conv.main_flow not in flows:
+        report.problems.append(
+            f"the main flow {conv.main_flow} names no flow in {spec.name}/{conv.flow_dir}/ — "
+            f"name a file there matching {conv.flow_glob!r}, or nothing can be reached from it")
+        return
+    chapters = {name: node_format.read(path) for name, path in flows.items()}
+    reached, todo = set(), [conv.main_flow]
+    while todo:
+        name = todo.pop()
+        if name in reached:
+            continue
+        reached.add(name)
+        text = flows[name].read_text(encoding="utf-8")
+        todo += [n for n in re.findall(r"\]\(([^)#\s/]+\.md)(?:#[^)]*)?\)", text) if n in flows]
+        chapter = chapters[name]
+        for drawn in (chapter.subflows if chapter else ()):
+            todo += [n for n, c in chapters.items() if c and n != name and expands(drawn, c)]
+    for name in sorted(set(flows) - reached):
+        report.problems.append(
+            f"{name} is neither drawn from the main flow nor referenced from a flow that is — draw "
+            f"it as a step of {conv.main_flow} or of a flow under it, or link it from one")
 
 
 def _review(spec: Path, conv: Conventions, report: Report) -> None:
@@ -300,6 +340,14 @@ def _review(spec: Path, conv: Conventions, report: Report) -> None:
             # there are two of something cannot decide anything about either — which is the whole
             # of what an observation asks of them.
             report.checked += [f"  {line}" for line in seen]
+
+
+def _flows_drawn(chapter, chapters: dict) -> set:
+    """The sub-flow steps of ``chapter`` that another chapter expands."""
+    from goldspec.review import expands
+
+    return {d for d in chapter.subflows
+            if any(c is not chapter and expands(d, c) for c in chapters.values())}
 
 
 def _nodes(spec: Path, conv: Conventions, report: Report) -> None:
@@ -340,8 +388,10 @@ def _nodes(spec: Path, conv: Conventions, report: Report) -> None:
         # Off the parsed chapter, never off the markdown again: the diagram had two readers and
         # they disagreed about which ids it draws, so a check could read an empty set and pass
         # without comparing anything.
-        drawn = {i for i in chapter.var2id.values() if i.startswith(prefix)}
-        found = node_format.faults(chapter, prefix, drawn)
+        # A main flow's steps that are whole flows carry those flows' prefixes, not its own.
+        flows = _flows_drawn(chapter, converted) if path.name == conv.main_flow else set()
+        drawn = {i for i in chapter.var2id.values() if i.startswith(prefix)} | flows
+        found = node_format.faults(chapter, prefix, drawn, flows)
         report.problems += found
 
 

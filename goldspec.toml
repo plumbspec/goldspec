@@ -33,3 +33,5 @@ flow_glob = "*-*.md"
 # and unresolved after them is a fault. What is unsettled is only whether a relative path is how a
 # corpus should say where its neighbour lives.
 siblings = ["../plumb/spec"]
+# The flow the method starts from: every other flow is one of its steps (`spe1-ur5`).
+main_flow = "spe-specify-a-process.md"

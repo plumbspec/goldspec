@@ -133,6 +133,23 @@ shape of somebody's business.
 become **quantities to tune** toward a goal. A flow made mostly of parameters rather than stories is
 at the ceiling. That is a thing you notice rather than decide.
 
+### One main flow
+
+**A corpus has one flow it starts from, and every other flow is reached from it** — drawn as one of
+its steps, or as a step of a flow under it, or linked from one that is. A reader starting at the
+top can then find every chapter, and a flow nobody reaches is one nobody will read.
+
+The main flow's steps are whole flows, so each is **named by that flow's own prefix**: `ch2` for the
+flow whose steps are `ch2-1`, `ch2-2`; `ado` for a flow named by sigil, whose steps are `ado1`,
+`ado2`. Draw it bold, as a sub-flow — `ADO[[<b>ado</b> · bring the tool to a project]]:::subroutine`
+— and give it an ordinary `### ado · …` block whose Information table says what crosses into and
+out of that flow. Nothing is renumbered to sit under it, and the boundary is checked like any other
+sub-flow's.
+
+Name it in your conventions with `main_flow`, and the gate holds the rest: a flow neither drawn from
+it nor linked from a flow that is is a fault. A flow entered from several places — the same
+hand-over used by more than one step — is linked from where it is entered rather than drawn twice.
+
 ---
 
 ## 3. Draw the flow first
@@ -688,6 +705,7 @@ here is a defect in this page.
 | a decision or parameter's id | one not namespaced to its chapter, wherever it is stated, and one stated twice |
 | a citation | an id cited by a test that no chapter in this spec declares |
 | sub-flows | a node drawn `[[…]]` that no chapter expands, and a parent and child disagreeing about what crosses between them |
+| the main flow | where `main_flow` is named, a file that is not one of the flows, and a flow neither drawn from it nor linked from a flow that is |
 
 **`parent` is not checked against the corpus.** Nothing confirms that a chapter using it is one
 something else actually drills into, and nothing can: with `siblings`, the flow that hands this one
@@ -737,10 +755,11 @@ namespace = "ord"              # ids read ord1-1, ord1-2
 flow_dir  = "flows"            # where the process flows live, relative to the spec
 flow_glob = "story-*.md"       # how a flow file is named
 siblings  = ["../shared/spec"] # more of this corpus, read for what it defines, never checked
+main_flow = "story-00-shop.md" # the one flow the corpus starts from — see "One main flow"
 ```
 
 Every key is optional, and the defaults are our habits: `namespace = "ch"`, `flow_dir = "diagrams"`,
-`flow_glob = "chapter-*.md"`, no siblings. A
+`flow_glob = "chapter-*.md"`, no siblings, no main flow named. A
 project that took all of them writes no file at all.
 
 **Write only what differs.** A key restating a default is a copy, and it will not rot at the same

@@ -2,6 +2,19 @@
 
 What each release gives you, and what to change to take it.
 
+## Unreleased
+
+**One main flow.** Name the flow a corpus starts from with `main_flow` in `goldspec.toml`. Its
+steps are the corpus's other flows, each named by its own prefix — `ado` for a flow whose steps are
+`ado1`, `ch2` for one whose steps are `ch2-1` — so a flow takes its place under it with no id
+changing, and the boundary is checked like any sub-flow's. A main flow may also be a process
+with steps of its own, which are still held to its own prefix. Once it is named, a flow neither drawn
+from it nor linked from a flow that is fails the gate.
+
+**What a sub-flow makes and takes below itself never left it.** A step was told to declare an
+element its sub-flow's own drill-down consumed, because the chapter below the sub-flow counted as
+another chapter. Found by the first corpus three levels deep.
+
 ## 0.2.0 — chapters that are stories, and one Python
 
 **A chapter is a set of stories, not a table.** Every step of a flow is somebody's story — a role,

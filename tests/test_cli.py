@@ -342,10 +342,87 @@ def with_row(text: str, row: str) -> str:
 #: One fixture per thing the gate can say. The value is the spec tree: relative path -> content,
 #: written under `tmp_path`, with the spec itself at `spec/`. Anything outside `spec/` is there to
 #: be read as a citation source, which is `cited_from` in the CLI's own call.
+# ---- a main flow -------------------------------------------------------------------------------
+#
+# A corpus whose flows are named by sigil, so the main flow's steps are the sigils themselves:
+# `ord` drills into the chapter whose steps are `ord1`, `ord2`, and nothing is renumbered to sit
+# under it (`spe1-sr5`).
+
+ORDERING = (CLEAN.replace("# Chapter 1 — a customer places an order", "# ord · take an order")
+            .replace("ch1-D1", "ord-D1").replace("ch1-1", "ord1").replace("ch1-2", "ord2"))
+
+PAYING = (CLEAN.replace("# Chapter 1 — a customer places an order", "# pay · take payment")
+          .replace("ch1-D1", "pay-D1").replace("ch1-1", "pay1").replace("ch1-2", "pay2"))
+
+
+def main_flow(sigil: str, title: str) -> str:
+    """A main flow with one step, which is a whole flow named by its own prefix."""
+    return f"""# shop · the shop
+
+**Last updated** 2026-10-26 v1
+
+> **As a shopkeeper I want every order taken and charged, so that the shop is paid for what it
+> sells.**
+
+```mermaid
+flowchart TD
+    START([START]):::terminal
+    STEP[[<b>{sigil}</b> · {title}]]:::subroutine
+    DONE([END]):::good
+    START --> STEP --> DONE
+
+    classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;
+    classDef subroutine fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;
+    classDef good fill:#e2f2e2,stroke:#0ca30c,color:#0b0b0b;
+```
+
+## Nodes
+
+### {sigil} · {title}
+
+> **As a shopkeeper I want an order taken and charged once, so that I am paid for it.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| {sigil}-inf1 | In | `basket` | yes | authored |
+| {sigil}-inf2 | Out | `charge` | yes | derived |
+
+#### User Requirements
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
+
+## Glossary
+
+| Term | Meaning |
+|---|---|
+| Shop | Where an order is taken and paid for |
+"""
+
+
+SIGILS = '[conventions]\nnamespace = "(?:ord|pay)"\nflow_glob = "*-*.md"\nmain_flow = "shop-main.md"\n'
+
+
+def sigil_corpus(**extra: str) -> dict:
+    """A main flow over `ord`, and whatever other flows a case adds beside it."""
+    return {"spec/goldspec.toml": SIGILS,
+            "spec/diagrams/shop-main.md": main_flow("ord", "take an order"),
+            "spec/diagrams/ord-take-an-order.md": ORDERING,
+            **{f"spec/diagrams/{name}": text for name, text in extra.items()}}
+
+
 CASES: dict[str, dict[str, str]] = {
     "clean": {
         "spec/diagrams/chapter-01-example.md": CLEAN,
     },
+    "main_flow_leaves_a_flow_unreached": sigil_corpus(**{"pay-take-payment.md": PAYING}),
+    "main_flow_names_no_flow": {**sigil_corpus(),
+                                "spec/goldspec.toml": SIGILS.replace("shop-main.md", "nowhere.md")},
     "flow_without_a_start": {
         # A and B point at each other, so neither is a start; C is reached and reaches nothing,
         # so an end exists and only the start is missing.
@@ -574,6 +651,8 @@ EXPECTED: dict[str, str] = {
     "subflow_parent_hides_a_transit": "does not declare",
     "subject_declared_twice": "has more than one trace row",
     "cited_and_declared_nowhere": "declared nowhere in spec/",
+    "main_flow_leaves_a_flow_unreached": "is neither drawn from the main flow nor referenced",
+    "main_flow_names_no_flow": "names no flow in",
 }
 
 
@@ -811,6 +890,101 @@ def test_the_command_holds_the_sections_in_order(tmp_path, capsys):
         code, out = run(case, tmp_path / case, capsys)
         assert code != 0 and expected in out, f"{case}: {out}"
 
+
+
+@pytest.mark.proves("spe1", depth="wiring")
+def test_a_whole_flow_takes_its_place_under_the_main_flow_by_its_own_prefix(tmp_path, capsys):
+    """`spe1-ur5`, `spe1-sr5` — one main flow, and its steps are the corpus's other flows.
+
+    Both namings: a sigil (`ord`, whose steps are `ord1`) and a number (`ch1`, whose steps are
+    `ch1-1`). Neither flow is renumbered to sit under the main flow, and the boundary between them
+    is checked like any other sub-flow's — a step that claims what its flow never makes is still
+    caught.
+    """
+    numbered = {"spec/goldspec.toml": '[conventions]\nmain_flow = "chapter-00-shop.md"\n',
+                "spec/diagrams/chapter-00-shop.md": main_flow("ch1", "a customer places an order"),
+                "spec/diagrams/chapter-01-example.md": CLEAN.replace(
+                    "**Decision `ch1-D1` — the processor's reconciliation window closes at 02:00.**",
+                    "")}
+    for name, tree in (("sigil", sigil_corpus()), ("numbered", numbered)):
+        spec = _write(tmp_path / name, tree)
+        code = main([str(spec)])
+        out = capsys.readouterr().out
+        assert code == 0, f"{name}: {out}"
+
+    overclaims = sigil_corpus(**{"shop-main.md": main_flow("ord", "take an order").replace(
+        "| ord-inf2 | Out | `charge` | yes | derived |",
+        "| ord-inf2 | Out | `charge` | yes | derived |\n| ord-inf3 | Out | `refund` | yes | derived |")})
+    code = main([str(_write(tmp_path / "overclaims", overclaims))])
+    out = capsys.readouterr().out
+    assert code != 0 and "shop-main.md#ord claims to leave with refund" in out, out
+
+
+@pytest.mark.proves("spe5", depth="wiring")
+def test_a_flow_nobody_reaches_from_the_main_flow_fails_the_command(tmp_path, capsys):
+    """`spe5-sr8` — a flow beside the main flow and reached from nothing is a fault, and one
+    referenced from a reached flow is not."""
+    code, out = run("main_flow_leaves_a_flow_unreached", tmp_path / "unreached", capsys)
+    assert code != 0 and ("pay-take-payment.md is neither drawn from the main flow nor "
+                          "referenced") in out, out
+
+    referenced = sigil_corpus(**{"pay-take-payment.md": PAYING,
+                                 "ord-take-an-order.md": ORDERING.replace(
+                                     "## Nodes", "Paid for in [pay · take payment](pay-take-payment.md).\n\n## Nodes")})
+    code = main([str(_write(tmp_path / "referenced", referenced))])
+    out = capsys.readouterr().out
+    assert code == 0, out
+
+    code, out = run("main_flow_names_no_flow", tmp_path / "nowhere", capsys)
+    assert code != 0 and "nowhere.md names no flow in" in out, out
+
+
+@pytest.mark.proves("spe5", depth="wiring")
+def test_what_a_sub_flow_makes_and_takes_below_itself_never_left_it(tmp_path, capsys):
+    """`spe5-sr9` — `ord2` drills further, and what its own chapter makes and takes is not owed at
+    the main flow. Before this, the chapter below the sub-flow counted as *another chapter*, so a
+    three-level corpus was told to declare its own interior at the top."""
+    grand = (CLEAN.replace("# Chapter 1 — a customer places an order", "# ord2 · charge it")
+             .replace("ch1-D1", "ord2-D1").replace("ch1-1", "ord2-1").replace("ch1-2", "ord2-2")
+             .replace("`order`", "`ledger_line`")
+             .replace("| ord2-1-inf1 | In | `basket` | yes | authored |",
+                      "| ord2-1-inf1 | In | `order` | yes | parent |"))
+    child = (ORDERING.replace("    CHARGE[ord2 charge once]:::process",
+                              "    CHARGE[[ord2 charge once]]:::subroutine")
+             .replace("    classDef good", "    classDef subroutine fill:#e9eef5,stroke:#2a78d6,"
+                                          "color:#0b0b0b;\n    classDef good")
+             .replace("| ord2-inf2 | Out | `charge` | yes | observed |",
+                      "| ord2-inf2 | Out | `charge` | yes | observed |\n"
+                      "| ord2-inf3 | Out | `ledger_line` | yes | derived |"))
+    tree = sigil_corpus(**{"ord-take-an-order.md": child, "ord2-charge-it.md": grand})
+    code = main([str(_write(tmp_path, tree))])
+    out = capsys.readouterr().out
+    assert code == 0, out
+
+
+@pytest.mark.proves("spe1", depth="wiring")
+def test_a_main_flow_with_steps_of_its_own_still_namespaces_them(tmp_path, capsys):
+    """`spe1-sr5` — a main flow may be a process in its own right, drawing other flows among its
+    own steps. The flows are named by their prefixes; its own steps are still held to its own."""
+    main_with_steps = (PAYING
+        .replace("    START --> TAKE --> CHARGE --> DONE",
+                 "    ORD[[<b>ord</b> · take an order]]:::subroutine\n"
+                 "    START --> ORD --> TAKE --> CHARGE --> DONE")
+        .replace("    classDef good", "    classDef subroutine fill:#e9eef5,stroke:#2a78d6,"
+                                      "color:#0b0b0b;\n    classDef good")
+        .replace("## Nodes\n", "## Nodes\n\n" + main_flow("ord", "take an order")
+                 .split("## Nodes\n\n", 1)[1].split("## Glossary", 1)[0] + "---\n\n"))
+    conv = SIGILS.replace("shop-main.md", "pay-take-payment.md")
+    tree = {"spec/goldspec.toml": conv, "spec/diagrams/pay-take-payment.md": main_with_steps,
+            "spec/diagrams/ord-take-an-order.md": ORDERING}
+    code = main([str(_write(tmp_path / "own", tree))])
+    out = capsys.readouterr().out
+    assert code == 0, out
+
+    misnamed = {**tree, "spec/diagrams/pay-take-payment.md": main_with_steps.replace("pay2", "zz2")}
+    code = main([str(_write(tmp_path / "misnamed", misnamed))])
+    out = capsys.readouterr().out
+    assert code != 0 and "#zz2 is not namespaced to its chapter" in out, out
 
 
 @pytest.mark.proves("ent6", depth="wiring")

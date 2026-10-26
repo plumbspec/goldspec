@@ -1,15 +1,22 @@
 # spe · specify a process
 
-**Last updated** 2026-09-24 v4
+**Last updated** 2026-10-26 v5
 
 What somebody who owns a process does to write it down, so that what they decided can be argued
-with and what they left out can be found. Exits to [cus · keep the corpus](cus-keep-the-corpus.md),
-which holds what this produces, and to [vie · answer an audience](vie-answer-an-audience.md),
-which reads it.
+with and what they left out can be found. This is the method's main flow: every other flow is one
+of its steps. A team with specifications already written enters through
+[ent · enter the method](ent-enter-the-method.md); a word another spec defines is settled in
+[sha · share a word across owners](sha-share-a-word-across-owners.md); another approach to a
+stamped flow is weighed in [alt · weigh an alternative](alt-weigh-an-alternative.md); and what
+this produces is held by [cus · keep the corpus](cus-keep-the-corpus.md) and read by
+[vie · answer an audience](vie-answer-an-audience.md).
 
 ```mermaid
 flowchart TD
     IN([<b>START</b> · somebody owns a process,<br/>and it is not written down]):::terminal
+
+    EXISTQ{are specifications<br/>already written?}:::question
+    ENT[[<b>ent</b> · enter the method<br/>▸ drills down]]:::subroutine
 
     DRAW[<b>spe1</b> · draw the flow first]:::process
     STORY[<b>spe2</b> · expand every drawn step into somebody's story]:::process
@@ -17,23 +24,62 @@ flowchart TD
     CONSTRAIN[<b>spe4</b> · give every constraint an id beside the step it constrains]:::process
     FITS{does every step<br/>still fit on a page?}:::question
     GATE[<b>spe5</b> · run the gates and read what they found]:::process
+    SHA[[<b>sha</b> · share a word across owners<br/>▸ drills down]]:::subroutine
     STAMP[<b>spe6</b> · stamp it]:::process
+    ALTQ{another approach<br/>worth weighing?}:::question
+    ALT[[<b>alt</b> · weigh an alternative<br/>▸ drills down]]:::subroutine
+    CUS[[<b>cus</b> · keep the corpus<br/>▸ drills down]]:::subroutine
+    VIE[[<b>vie</b> · answer an audience<br/>▸ drills down]]:::subroutine
 
-    OUT([<b>END</b> · a chapter a person reads<br/>and a gate holds]):::good
+    OUT([<b>END</b> · a chapter a person reads, a gate holds,<br/>and an audience is answered from]):::good
 
-    IN --> DRAW --> STORY --> MOVES --> CONSTRAIN --> FITS
+    IN --> EXISTQ
+    EXISTQ -->|yes| ENT --> DRAW
+    EXISTQ -->|no| DRAW
+    DRAW --> STORY --> MOVES --> CONSTRAIN --> FITS
     FITS -->|it is a page| GATE
     FITS -->|it is a flow| DRAW
     GATE -->|faults| STORY
-    GATE -->|clean| STAMP --> OUT
+    GATE -->|a word another spec defines| SHA --> GATE
+    GATE -->|clean| STAMP --> ALTQ
+    ALTQ -->|yes| ALT --> DRAW
+    ALTQ -->|no| CUS --> VIE --> OUT
 
     classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;
     classDef process fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;
+    classDef subroutine fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;
     classDef question fill:#fdf3d8,stroke:#b8860b,color:#0b0b0b;
     classDef good fill:#e2f2e2,stroke:#0ca30c,color:#0b0b0b;
 ```
 
 ## Nodes
+
+### ent · enter the method
+
+> **As somebody with specifications already written I want to start the method on them as they
+> are, so that trying it costs a run rather than a rewrite.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| ent-inf1 | In | `chapter` | yes | authored |
+| ent-inf2 | In | `fault` | yes | observed |
+| ent-inf3 | Out | `conventions` | yes | derived |
+| ent-inf4 | Out | `sibling_spec` | optional | derived |
+| ent-inf5 | Out | `step` | yes | derived |
+| ent-inf6 | Out | `requirement` | yes | derived |
+
+#### User Requirements
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
+
+
+---
 
 ### spe1 · draw the flow first
 
@@ -55,6 +101,8 @@ flowchart TD
   * spe1-ur2 - a back-edge is legal: rework, retry and *go back and amend*
   * spe1-ur3 - one activity drawn twice under two names is visible; in prose it is not
   * spe1-ur4 - the chapter's own title says what process it is, in the language of the work
+  * spe1-ur5 - a corpus has one main flow, and every other flow is drawn from it as a sub-flow or
+    referenced from a flow that is, so a reader starting at the top can reach every chapter
 
 #### System Requirements
   * spe1-sr1 - the drawing renders wherever markdown does, with nothing built first
@@ -62,6 +110,9 @@ flowchart TD
     template
   * spe1-sr3 - a label carrying a quote or a bracket is quoted
   * spe1-sr4 - a shape carries one meaning across every chapter of the corpus
+  * spe1-sr5 - a step of the main flow that is a whole flow is named by that flow's own prefix —
+    `ado` for a flow whose steps are `ado1`, `ch2` for one whose steps are `ch2-1` — so a flow
+    takes its place under the main flow without one of its ids changing
 
 #### Non-Functional Requirements
   * spe1-nfr1 - a flow too dense to read on one sheet has a step in it that is really a process
@@ -201,7 +252,7 @@ flowchart TD
 | spe5-inf1 | In | `chapter` | yes | spe1 |
 | spe5-inf2 | In | `information_row` | yes | spe3 |
 | spe5-inf3 | In | `requirement` | yes | spe4 |
-| spe5-inf4 | In | `sibling_spec` | optional | parent |
+| spe5-inf4 | In | `sibling_spec` | optional | ent |
 | spe5-inf5 | Out | `fault` | yes | derived |
 
 #### User Requirements
@@ -230,6 +281,10 @@ flowchart TD
     way per question: a step producing the whole SUPPLIES a step taking a part, and a step taking a
     part READS a step producing the whole. Neither reverses — producing a part does not supply a
     demand for the whole, and taking the whole is not a demand for any particular part
+  * spe5-sr8 - where a corpus names its main flow, a flow neither drawn from it nor referenced
+    from a flow that is reachable is a fault
+  * spe5-sr9 - an element a sub-flow makes and a flow outside it takes is declared at the step it
+    leaves through; one made and taken inside the sub-flow, at whatever depth, has not left it
 
 #### Non-Functional Requirements
   * spe5-nfr1 - a gate reports what it can decide and never what it would have to judge
@@ -245,6 +300,30 @@ flowchart TD
   * spe5-u1 - a stated constraint and the code that enforces it can still drift, and nothing
     compares them; the candidates are a citation from the constraint to what enforces it, a test
     asserting the two agree, or accepting this as a place the method describes and does not verify
+
+
+---
+
+### sha · share a word across owners
+
+> **As the owner of a spec whose word another spec also defines I want the two settled without
+> either of us rewriting, so that both specs stay ours and still mean something to each other.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| sha-inf1 | In | `name_conflict` | yes | observed |
+| sha-inf2 | In | `synonym_candidate` | yes | observed |
+| sha-inf3 | Out | `namespace_mapping` | yes | derived |
+
+#### User Requirements
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
 
 
 ---
@@ -280,6 +359,74 @@ flowchart TD
   * spe6-u1 - the version is not left-padded, so a chapter revised more than nine times in one day
     sorts wrong against its own ordering rule
 
+---
+
+### alt · weigh an alternative
+
+> **As somebody with a stamped flow I want to explore another approach without copying the plan,
+> so that I choose between them knowing what each needs.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| alt-inf1 | In | `flow` | yes | spe1 |
+| alt-inf2 | Out | `disposition` | yes | derived |
+
+#### User Requirements
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
+
+
+---
+
+### cus · keep the corpus
+
+> **As somebody responsible for what this produces I want it held so a citation written today
+> still resolves in ten years, so that a chapter outlives its document.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| cus-inf1 | In | `draft` | yes | authored |
+| cus-inf2 | Out | `subject.key` | yes | derived |
+
+#### User Requirements
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
+
+
+---
+
+### vie · answer an audience
+
+> **As whoever an audience asks I want to answer from the spec and its run, so that nobody keeps a
+> document beside the spec for each audience.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+| vie-inf1 | In | `subject.key` | yes | cus |
+| vie-inf2 | Out | `view` | yes | derived |
+
+#### User Requirements
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
+
 
 ## Glossary
 
@@ -293,6 +440,7 @@ flowchart TD
 | Derived | Computed by this step from what it took in. |
 | Observed | Read off a run, a tree or the world as it stands. |
 | Generated | Made by a tool rather than by a person, and not recomputable. |
+| Main flow | The one flow a corpus starts from. Its steps are the corpus's other flows, named by their own prefixes. |
 | Parent | On a sub-flow's input: handed in by the chapter this one drills into. |
 | Requirement | A constraint with an id, on the step it constrains — what the person needs, what the system must do, or what holds whatever the design. |
 | Open unknown | Something nobody has decided, with what would settle it, hanging off the step it affects. |

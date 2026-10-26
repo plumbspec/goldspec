@@ -128,12 +128,16 @@ def _descendants(edges: dict, source: str) -> set:
 
 
 def _read_elsewhere(siblings, skip) -> set:
-    """Every name the rest of the corpus consumes. One read per neighbouring chapter."""
+    """Every name the rest of the corpus consumes. One read per neighbouring chapter.
+
+    ``skip`` is a chapter's name, or the names of every chapter that is not *the rest*.
+    """
     from goldspec import nodes as node_format
 
+    skip = {skip} if isinstance(skip, str) else set(skip)
     seen = set()
     for other in siblings:
-        if Path(other).name == skip:
+        if Path(other).name in skip:
             continue
         ch = node_format.read(Path(other))
         if ch:
@@ -411,7 +415,7 @@ def cross_flow(path: Path, siblings: list) -> list[str]:
             if Path(other) == Path(path):
                 continue
             ch = node_format.read(Path(other))
-            if ch and any(re.fullmatch(rf"{re.escape(drawn)}-[a-z]?\d+", n.id) for n in ch.nodes):
+            if ch and expands(drawn, ch):
                 child, child_path = ch, other
                 break
         if child is None:
@@ -441,7 +445,9 @@ def cross_flow(path: Path, siblings: list) -> list[str]:
         if unused:
             found.append(f"{name}#{drawn} takes {', '.join(unused)}, which no step of the chapter "
                          f"it drills into consumes")
-        elsewhere = _read_elsewhere(siblings, Path(child_path).name)
+        # The sub-flow and everything it drills into, at whatever depth (`spe5-sr9`): an element
+        # made and taken below the child never left it, so it is not owed at this step.
+        elsewhere = _read_elsewhere(siblings, _beneath(Path(child_path), siblings))
         # `spe5-sr7` — a taker of a PART reads a producer of the whole, and taking the whole is
         # not a demand for any particular part. This read the rule backwards: `story` consumed by
         # any chapter made every `story.*` a child produced look wanted, so a parent was told to
@@ -457,6 +463,35 @@ def cross_flow(path: Path, siblings: list) -> list[str]:
             found.append(f"{name}#{drawn} does not declare {', '.join(escapes)}, which the chapter "
                          f"it drills into produces and another chapter consumes")
     return found
+
+
+def _beneath(top: Path, siblings) -> set:
+    """``top``'s name and the names of every chapter it drills into, at whatever depth."""
+    from goldspec import nodes as node_format
+
+    chapters = {Path(p).name: node_format.read(Path(p)) for p in siblings}
+    chapters[top.name] = chapters.get(top.name) or node_format.read(top)
+    found, todo = set(), [top.name]
+    while todo:
+        name = todo.pop()
+        if name in found or chapters.get(name) is None:
+            found.add(name)
+            continue
+        found.add(name)
+        for drawn in chapters[name].subflows:
+            todo += [n for n, c in chapters.items() if c and n not in found and expands(drawn, c)]
+    return found
+
+
+def expands(drawn: str, chapter) -> bool:
+    """Whether ``chapter`` is the flow a sub-flow step ``drawn`` drills into.
+
+    A numbered step's flow nests under it with a hyphen — ``ch1-2`` into ``ch1-2-1``. A main flow's
+    step is named by a flow's own prefix (`spe1-sr5`), and a sigil's steps follow it directly —
+    ``ado`` into ``ado1`` — so a flow takes its place under the main flow with no id changing.
+    """
+    tail = r"\d+" if drawn.isalpha() else r"-[a-z]?\d+"
+    return any(re.fullmatch(rf"{re.escape(drawn)}{tail}", n.id) for n in chapter.nodes)
 
 
 def review(path: Path, siblings=(), prefix: str | None = None) -> list[str]:
