@@ -393,7 +393,7 @@ flowchart TD
 
 | Information | IO | Description | Required | Provenance |
 |---|---|---|---|---|
-| cus-inf1 | In | `draft` | yes | authored |
+| cus-inf1 | In | `chapter` | yes | spe1 |
 | cus-inf2 | Out | `subject.key` | yes | derived |
 
 #### User Requirements

@@ -1,6 +1,6 @@
 # cus · keep the corpus
 
-**Last updated** 2026-09-14 v1
+**Last updated** 2026-10-26 v2
 
 What somebody responsible for a body of specifications does to keep it citable for as long as
 anything points at it: hold it in one authority, name its subjects so the name outlives the number,
@@ -41,7 +41,7 @@ flowchart TD
 
 | Information | IO | Description | Required | Provenance |
 |---|---|---|---|---|
-| cus1-inf1 | In | `draft` | yes | authored |
+| cus1-inf1 | In | `chapter` — while it is a draft | yes | parent |
 | cus1-inf2 | Out | `provisional_reference` | yes | authored |
 
 #### User Requirements
