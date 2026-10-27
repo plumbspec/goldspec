@@ -1,0 +1,21 @@
+version: 2
+
+# The action versions in `workflows/` are a hand-maintained list of somebody else's releases, and a
+# list like that goes stale quietly. This is the mechanism rather than the reminder.
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # Every action bump arrives in one pull request, however many actions moved. Nothing verifies
+    # it until the next cut — `build.yml` runs on dispatch only — which is accepted rather than
+    # overlooked, as in plumb.
+    groups:
+      actions:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci"

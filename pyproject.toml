@@ -24,6 +24,11 @@ requires-python = ">=3.9"
 # runner present for the gate an adopter runs, and 8 runs it.
 dependencies = ["pytest>=8"]
 
+# Where the package index links back to: the site, and the source.
+[project.urls]
+Homepage = "https://plumbspec.org"
+Source = "https://github.com/plumbspec/goldspec"
+
 # The command, and now only the command. A wheel was once the only shape that worked, because a
 # project's chapter modules did `from goldspec import story` and nothing can import that out of a
 # single-file archive. Subjects are declared in markdown now, so nothing outside this package
