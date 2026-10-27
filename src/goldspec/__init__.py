@@ -19,7 +19,7 @@ project's spec; nothing under ``src/plumb`` may import this package.
 
 #: The one authored version. The cut derives `<base>.dev<n>+<sha>` from it and stamps
 #: the artifact, so this is never the version anybody reads back — see plumb's releasing runbook.
-BASE_VERSION = "0.3.0"
+BASE_VERSION = "0.3.1"
 
 try:  # written into the artifact at build time; absent in a checkout, which is not a build
     from goldspec._built import VERSION as __version__

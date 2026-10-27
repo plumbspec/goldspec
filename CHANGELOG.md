@@ -2,6 +2,13 @@
 
 What each release gives you, and what to change to take it.
 
+## 0.3.1 — how to verify it, and where to report
+
+**New.** `SECURITY.md` says how to check a release against its checksums and signature, and names
+the signing key. `CONTRIBUTING.md` says how to run the suite and the gate. Vulnerability reports
+and proposals for a large change go to [support.plumbspec.org](https://support.plumbspec.org).
+The package links to plumbspec.org and its source.
+
 ## 0.3.0 — one tree, and a gate a newcomer can follow
 
 **One main flow, and one tree under it.** Name the flow a corpus starts from with `main_flow` in
