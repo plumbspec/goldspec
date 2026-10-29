@@ -7,7 +7,7 @@ goldspec ships two artifacts from each release — `goldspec.pyz`, the command, 
 detached signature, `SHA256SUMS.asc`. The signature is over the **checksums**, so one signature
 covers everything a release contains.
 
-The [instructions on the site](https://plumbspec.org/gold/) install the command and check both. By
+The [instructions on the site](https://gold.plumbspec.org/) install the command and check both. By
 hand, with the three files downloaded into one directory:
 
     gpg --keyserver hkps://keys.openpgp.org --recv-keys 208BC1279656FEEA7C2F9A1D830604D51CA7D4FB

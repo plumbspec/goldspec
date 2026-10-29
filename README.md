@@ -53,7 +53,7 @@ Two artifacts ship from the same release, listed in one `SHA256SUMS` and covered
 
 | | what it is for |
 | --- | --- |
-| `goldspec.pyz` | the **command**. Checking a spec by hand, or before anything is wired up. Install it by following the [instructions on the site](https://plumbspec.org/gold/), which check its checksum and signature; it needs no project of yours to be a Python one |
+| `goldspec.pyz` | the **command**. Checking a spec by hand, or before anything is wired up. Install it by following the [instructions on the site](https://gold.plumbspec.org/), which check its checksum and signature; it needs no project of yours to be a Python one |
 | `goldspec-<version>-py3-none-any.whl` | the **library**. `pip install` it and import `check_spec_directory` into your own test — which is what the paragraph above actually describes |
 
 If you are reading a spec, take the command. If you are holding a spec to its gates on every run,
