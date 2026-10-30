@@ -2,6 +2,23 @@
 
 What each release gives you, and what to change to take it.
 
+## 0.4.0 — one main flow, said on the front page and by the gate
+
+**A corpus of top-level flows side by side is warned of.** Where no `main_flow` is named, the gate
+cannot hold a corpus to one tree, so a set of unrelated flows passed silently. The run now warns
+when more than one flow is entered from nothing, names them, and suggests the one that reaches the
+most as the main flow. It is a warning on stderr; the exit code is unchanged. Naming `main_flow`
+still turns an unreached flow into a fault.
+
+**The rule is on the README's front page.** A chapter is a process flow, and a step that is itself a
+process drills into its own chapter, named for that step. The worked example names its main flow,
+and Getting started opens with its main flow and drill-down.
+
+**goldspec lives at [gold.plumbspec.org](https://gold.plumbspec.org/).**
+
+Nothing to change to take it. goldspec's own spec numbers `spe5`'s system requirements `sr01`…`sr10`;
+that matters only to something citing goldspec's own ids.
+
 ## 0.3.1 — how to verify it, and where to report
 
 **New.** `SECURITY.md` says how to check a release against its checksums and signature, and names
