@@ -2,9 +2,17 @@
 
 **Write your first chapter, understand every part of it, and get the gate green.**
 
-This walks one complete chapter part by part. The chapter ships at
-[`docs/example/spec/diagrams/chapter-01-ordering.md`](example/spec/diagrams/chapter-01-ordering.md), and goldspec's own test suite runs the gate over it on every run, so
-what you read here is what the gate accepts.
+This walks one complete chapter part by part, inside the shape every corpus takes: **one main flow,
+and a drill-down for each step that is itself a process.**
+
+    chapter-01-ordering.md            the main flow: ch1-1 take the order … ch1-4 tell the customer
+    └── chapter-01.3-charging.md      step ch1-3, charging, is a process of its own: ch1-3-1 …
+
+Both ship in [`docs/example/`](example/), with
+[`chapter-01-ordering.md`](example/spec/diagrams/chapter-01-ordering.md) named as the main flow,
+and goldspec's own test suite runs the gate over them on every run, so what you read here is what
+the gate accepts. A second chapter is a drill-down of a step, or a process this one links to (§2);
+never a second top-level flow beside the first.
 
 **Reading order.** A first chapter needs §1–§5, then [§8's template](#a-whole-chapter-to-copy) to
 start from and [§9](#9-run-the-gate) to read what the gate says. Converting a document you already
@@ -201,7 +209,13 @@ goldspec's own spec is laid out this way: `spe-specify-a-process.md` is the main
 `spe6-2-3-1-share-a-word-across-owners.md` expands a step of `spe6-2`.
 
 Name the main flow in your conventions with `main_flow`, and the gate holds the rest: **a flow
-neither drawn from it nor linked from a flow that is reached is a fault.** *Drawn* means a step drawn
+neither drawn from it nor linked from a flow that is reached is a fault.** Left unnamed, nothing can
+be held to it, so the run warns instead when more than one flow is entered from nothing — no other
+flow drills into it or links to it — and suggests the one that reaches the most:
+
+    goldspec: warning: 2 flows are entered from nothing — chapter-01-ordering.md, chapter-02-returns.md — and no main_flow is named, …
+
+ *Drawn* means a step drawn
 as a sub-flow, `[[…]]`, whose chapter's steps are numbered under it. *Linked* means a markdown link to
 the flow's file by its bare name — a file in the same directory — `[…](chapter-01.3-charging.md)`,
 anywhere in a reached flow. A flow
@@ -820,7 +834,7 @@ Run from `docs/example/`, the worked example gives:
 
     $ goldspec spec
     goldspec: conventions from goldspec.toml
-    goldspec: conventions: ids namespaced 'ch', flows in diagrams/chapter-*.md
+    goldspec: conventions: ids namespaced 'ch', flows in diagrams/chapter-*.md, main flow chapter-01-ordering.md
     goldspec: 14 subject(s) declared in spec/
     goldspec: 0 cited id(s) read from .
     goldspec: 2 process flow(s) render
@@ -849,9 +863,8 @@ no file — which is the right thing for a project on the defaults — sees the 
 
     goldspec: no goldspec.toml found — checking against the defaults
 
-With `main_flow` named, the conventions line says that too:
-
-    goldspec: conventions: ids namespaced 'ch', flows in diagrams/chapter-*.md, main flow chapter-01-ordering.md
+The conventions line ends with the main flow only where `main_flow` is named, as the example
+names it.
 
 Those two lines are how you tell *I took the defaults* from *my file is somewhere the tool does not
 look*, and they are the only way to tell, because the two are the same thing to every other check.
@@ -1055,8 +1068,8 @@ keys this version reads, rather than being ignored.
 
 **Write only what differs.** A key restating a default is a copy, and it will not rot at the same
 rate as the original — if a default ever moves, your file silently disagrees with it. The
-[example's `goldspec.toml`](example/goldspec.toml) is a `[conventions]` header with nothing under it.
-A file holding only `main_flow` is just as correct — every other key is then the default:
+[example's `goldspec.toml`](example/goldspec.toml) holds only `main_flow` — every other key is the
+default:
 
 ```toml
 [conventions]

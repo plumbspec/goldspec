@@ -97,7 +97,7 @@ class Conventions:
     siblings: tuple = ()
     #: The one flow the corpus starts from, by file name inside ``flow_dir`` (`spe1-ur5`). Every
     #: other flow is a drill-down named for the step it expands (`spe1-sr5`), and once the main flow
-    #: is named every flow has to be reachable from it (`spe5-sr8`). Empty means the corpus has not
+    #: is named every flow has to be reachable from it (`spe5-sr08`). Empty means the corpus has not
     #: said, and reachability is not checked.
     main_flow: str = ""
 

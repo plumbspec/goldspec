@@ -267,22 +267,24 @@ flowchart TD
     chapter nobody wrote is never mistaken for one that exists
 
 #### System Requirements
-  * spe5-sr1 - the gate is a pure source scan — no build, no network, no rendering
-  * spe5-sr2 - a check that cannot read the file reports that it could not, never that it passed
-  * spe5-sr3 - inputs a nested chapter takes from its parent are read against the parent, not
+  * spe5-sr01 - the gate is a pure source scan — no build, no network, no rendering
+  * spe5-sr02 - a check that cannot read the file reports that it could not, never that it passed
+  * spe5-sr03 - inputs a nested chapter takes from its parent are read against the parent, not
     reported as unproduced
-  * spe5-sr4 - a step states its constraints under the five headings, in one order; a heading
+  * spe5-sr04 - a step states its constraints under the five headings, in one order; a heading
     dropped or moved is a fault
-  * spe5-sr5 - a requirement is named for the step it is stated under, and an id is stated once
-  * spe5-sr6 - a required input is checked against the steps the flow actually reaches it from,
+  * spe5-sr05 - a requirement is named for the step it is stated under, and an id is stated once
+  * spe5-sr06 - a required input is checked against the steps the flow actually reaches it from,
     along the paths that do not loop; a back-edge is legal, so *upstream* is only defined there
-  * spe5-sr7 - a name and its dotted parts are one thing at two grains, and the relation runs one
+  * spe5-sr07 - a name and its dotted parts are one thing at two grains, and the relation runs one
     way per question: a step producing the whole SUPPLIES a step taking a part, and a step taking a
     part READS a step producing the whole. Neither reverses — producing a part does not supply a
     demand for the whole, and taking the whole is not a demand for any particular part
-  * spe5-sr8 - where a corpus names its main flow, a flow neither drawn from it nor referenced
+  * spe5-sr08 - where a corpus names its main flow, a flow neither drawn from it nor referenced
     from a flow that is reachable is a fault
-  * spe5-sr9 - an element a sub-flow makes and a flow outside it takes is declared at the step it
+  * spe5-sr10 - where a corpus names no main flow and more than one flow is entered from nothing,
+    the run warns, naming those flows and the one that reaches the most as the likely main flow
+  * spe5-sr09 - an element a sub-flow makes and a flow outside it takes is declared at the step it
     leaves through; one made and taken inside the sub-flow, at whatever depth, has not left it
 
 #### Non-Functional Requirements

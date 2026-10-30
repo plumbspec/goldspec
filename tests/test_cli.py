@@ -891,7 +891,7 @@ def test_a_flow_is_named_for_the_step_it_expands(tmp_path, capsys):
 
 @pytest.mark.proves("spe5", depth="wiring")
 def test_a_flow_nobody_reaches_from_the_main_flow_fails_the_command(tmp_path, capsys):
-    """`spe5-sr8` — a flow beside the main flow and reached from nothing is a fault, and one
+    """`spe5-sr08` — a flow beside the main flow and reached from nothing is a fault, and one
     referenced from a reached flow is not."""
     code, out = run("main_flow_leaves_a_flow_unreached", tmp_path / "unreached", capsys)
     assert code != 0 and ("pay-take-payment.md is neither drawn from the main flow nor "
@@ -910,7 +910,7 @@ def test_a_flow_nobody_reaches_from_the_main_flow_fails_the_command(tmp_path, ca
 
 @pytest.mark.proves("spe5", depth="wiring")
 def test_what_a_sub_flow_makes_and_takes_below_itself_never_left_it(tmp_path, capsys):
-    """`spe5-sr9` — `ord2-2` drills further, and what its own chapter makes and takes is not owed
+    """`spe5-sr09` — `ord2-2` drills further, and what its own chapter makes and takes is not owed
     at the main flow. The chapter below the sub-flow is not *another chapter*, so a three-level
     corpus is never told to declare its own interior at the top."""
     middle = (drill_down("ord2", "charge it")
@@ -966,7 +966,7 @@ def test_the_run_says_which_main_flow_it_judged_by(tmp_path):
 
 @pytest.mark.proves("spe5", depth="wiring")
 def test_a_requirement_in_a_dash_or_numbered_bullet_is_named_not_skipped(tmp_path, capsys):
-    """`spe5-sr4` — a requirement written as `- id - …` or `1. id - …`, the way most documents
+    """`spe5-sr04` — a requirement written as `- id - …` or `1. id - …`, the way most documents
     being converted already write them, is named as unread rather than silently dropped."""
     for bullet in ("  - ch1-1-ur1 - ", "1. ch1-1-ur1 - "):
         tree = {"spec/diagrams/chapter-01-example.md": CLEAN.replace("  * ch1-1-ur1 - ", bullet)}
@@ -1060,3 +1060,27 @@ def test_the_command_says_what_it_read_and_not_only_what_was_wrong(tmp_path, cap
     for line in expected.checked:
         assert line in err, (
             f"the command dropped what the gate said it read:\n  missing: {line}\n  said: {err}")
+
+
+@pytest.mark.proves("spe5", depth="wiring")
+def test_more_than_one_flow_entered_from_nothing_is_warned_where_no_main_flow_is_named(tmp_path, capsys):
+    """`spe5-sr10` — a corpus of unrelated top-level flows is the sprawl the one-tree rule prevents,
+    and with no `main_flow` named the gate cannot fail it. So it says so, names the flows nothing
+    drills into or links to, and suggests the one that reaches the most. A warning, never a fault."""
+    unnamed = TREE.replace('main_flow = "ord-take-an-order.md"\n', "")
+    sprawl = {**one_tree(**{"pay-take-payment.md": PAYING}), "spec/goldspec.toml": unnamed}
+    code = main([str(_write(tmp_path / "sprawl", sprawl))])
+    captured = capsys.readouterr()
+    assert code == 0, captured.out
+    warning = [line for line in captured.err.splitlines() if "warning" in line]
+    assert len(warning) == 1, captured.err
+    assert "ord-take-an-order.md, pay-take-payment.md" in warning[0]
+    assert "ord2-charge-it.md" not in warning[0].split("—")[0], "a drill-down is entered from its step"
+    assert 'main_flow = "ord-take-an-order.md"' in warning[0], "it reaches two flows, the other one"
+
+    one_root = {**one_tree(), "spec/goldspec.toml": unnamed}
+    main([str(_write(tmp_path / "one", one_root))])
+    assert "warning" not in capsys.readouterr().err, "one flow entered from nothing is the main flow"
+
+    main([str(_write(tmp_path / "named", one_tree(**{"pay-take-payment.md": PAYING})))])
+    assert "warning" not in capsys.readouterr().err, "with main_flow named it is a fault instead"

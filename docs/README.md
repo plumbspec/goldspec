@@ -7,7 +7,7 @@
 | [Getting started](getting-started.md) | anybody writing their first chapter | one complete chapter walked part by part, with the rules the gate enforces stated where an author looks for them |
 | [Writing a process flow](writing-a-process-flow.md) | anybody writing a chapter | how to write one that passes, habit by habit |
 | [Reviewing a chapter](reviewing-a-chapter.md) | anybody reading a chapter and deciding whether it is right | the judgements a gate cannot make, and the failures that look like style |
-| [The worked example](example/spec/diagrams/chapter-01-ordering.md) | anybody who would rather read a file than a page | the worked chapter from the tutorial and [its drill-down](example/spec/diagrams/chapter-01.3-charging.md), shipped in `docs/example/` as a spec directory you can run `goldspec` against |
+| [The worked example](example/spec/diagrams/chapter-01-ordering.md) | anybody who would rather read a file than a page | a main flow and [the drill-down](example/spec/diagrams/chapter-01.3-charging.md) its step `ch1-3` enters, the tutorial's chapters, shipped in `docs/example/` as a spec directory you can run `goldspec` against |
 | [Cite the spec from a test](getting-started.md#10-cite-the-spec-from-a-test) | anybody wiring tests to the spec | the `proves` and `informs` marks, where the gate looks for them, and what it refuses |
 | [Bringing in a document you already have](getting-started.md#13-bringing-in-a-document-you-already-have) | anybody converting an existing document into a chapter | where each part of the old document goes, what is dropped, and what the conversion's commit says |
 
@@ -34,7 +34,9 @@ copied cannot ship.
   you: say so in a `goldspec.toml` and the same checks run against your layout.
 - **One main flow, and one tree under it.** Name the flow a corpus starts from with `main_flow`;
   every other flow is a drill-down named for the step it is entered from, so the file names alone
-  show where each chapter sits.
+  show where each chapter sits. A step that is itself a process drills into its own chapter. Left
+  unnamed, the gate warns when more than one flow is entered from nothing, and names the likely main
+  flow.
 
 ## Not this, and deliberately
 

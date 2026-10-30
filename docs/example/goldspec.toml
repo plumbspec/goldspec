@@ -1,8 +1,10 @@
-# Only what differs from the defaults, which turns out to be nothing.
+# Only what differs from the defaults, which is one key.
 #
-# Every key — namespace `ch`, flows in `diagrams/chapter-*.md` — is already
-# what this project wants, and restating a default is a copy that will not rot at the same rate as
-# the original. If the defaults ever move, a file that repeated them silently disagrees.
+# Every other key — namespace `ch`, flows in `diagrams/chapter-*.md` — is already what this project
+# wants, and restating a default is a copy that will not rot at the same rate as the original. If
+# the defaults ever move, a file that repeated them silently disagrees.
 #
-# The section stays, so the file is a place to put the first thing that does differ.
+# The main flow is not a default, because there is none: naming it is what holds every other chapter
+# to the one tree under it.
 [conventions]
+main_flow = "chapter-01-ordering.md"

@@ -38,6 +38,20 @@ def test_the_worked_example_passes_the_gate_a_reader_would_run():
 
 
 
+def test_the_example_is_a_main_flow_with_a_drill_down_held_to_one_tree():
+    """The first corpus a reader sees is the shape every corpus takes: one main flow, named so the
+    gate holds the tree, and a chapter that drills into one of its steps — never two top-level flows
+    side by side, which is what a reader copying the example would otherwise learn."""
+    conv = conventions_for(EXAMPLE)
+    assert conv.main_flow == "chapter-01-ordering.md"
+    flows = sorted(p.name for p in (EXAMPLE / conv.flow_dir).glob(conv.flow_glob))
+    assert flows == ["chapter-01-ordering.md", "chapter-01.3-charging.md"]
+    tutorial = TUTORIAL.read_text(encoding="utf-8")
+    opening = tutorial[:tutorial.index("## 1.")]
+    assert "one main flow" in opening and "chapter-01.3-charging.md" in opening, (
+        "the tutorial shows the tree before it walks a chapter")
+
+
 
 def test_the_example_actually_exercises_the_checks():
     """Correspondence over an empty spec proves nothing, and 0 subjects is itself a fault the gate

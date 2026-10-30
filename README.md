@@ -4,6 +4,15 @@ The **gold-spec methodology** — a process flow whose every step is a user stor
 information it moves, the requirements that hold it and the questions still open, and the gates that
 keep all of it honest.
 
+**A chapter is a process flow, and a corpus is one main flow with one tree under it.** A step that
+is itself a process drills into its own chapter, named for that step — `chapter-01.3-charging.md`
+expands step `ch1-3` of `chapter-01-ordering.md` — so the file names alone show where every chapter
+sits. Not a set of top-level flows side by side: name the one the corpus starts from with
+`main_flow`, and the gate fails any flow that is not reached from it; leave it unnamed, and the gate
+warns when more than one flow is entered from nothing, and suggests which is the main one.
+[One main flow](docs/getting-started.md#one-main-flow) says when to draw a drill-down and when to
+link another process instead.
+
 **New here?** [Getting started](docs/getting-started.md) walks one complete chapter part by part and
 gets the gate green; [Cite the spec from a test](docs/getting-started.md#10-cite-the-spec-from-a-test)
 shows the mark a test carries to say which story it proves. [All the documentation](docs/README.md).

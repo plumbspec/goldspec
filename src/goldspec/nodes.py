@@ -121,7 +121,7 @@ _REQUIREMENT = re.compile(
 #: is the one remedy this method offers for a check that read nothing.
 #: Any list marker — `*`, `-`, `+` or a number — because a document being converted writes its
 #: requirements as `- R1 …` or `1. R1 …` far more often than as `*`, and a bullet the reader skips is
-#: a requirement nothing holds (`spe5-sr4`).
+#: a requirement nothing holds (`spe5-sr04`).
 _REQUIREMENT_SHAPED = re.compile(r"^\s*(?:[*+-]|\d+[.)])\s+([\w.-]+?-(?:ur|sr|nfr|u)\d+)",
                                  re.M | re.I)
 

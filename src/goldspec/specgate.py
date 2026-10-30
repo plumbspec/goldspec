@@ -307,36 +307,65 @@ def _dangling(spec: Path, conv: Conventions, report: Report) -> None:
                     f"— write that chapter, or correct the link")
 
 
-def _reached(spec: Path, conv: Conventions, report: Report) -> None:
-    """Every flow reachable from the main flow, where the corpus names one (`spe5-sr8`).
-
-    Reached means drawn as a sub-flow of a reached flow, or linked from one. A flow standing beside
-    the main flow and reached by neither is a chapter no reader starting at the top will find.
-    """
+def _enters(spec: Path, conv: Conventions) -> dict[str, set[str]]:
+    """Each flow, and the flows it enters — drawn as one of its sub-flows, or linked from it."""
     from goldspec import nodes as node_format
     from goldspec.review import expands
 
-    if not conv.main_flow:
-        return
     flows = {p.name: p for p in _flow_files(spec, conv)}
-    if conv.main_flow not in flows:
+    chapters = {name: node_format.read(path) for name, path in flows.items()}
+    enters = {}
+    for name, path in flows.items():
+        text = path.read_text(encoding="utf-8")
+        entered = {n for n in re.findall(r"\]\(([^)#\s/]+\.md)(?:#[^)]*)?\)", text) if n in flows}
+        chapter = chapters[name]
+        for drawn in (chapter.subflows if chapter else ()):
+            entered |= {n for n, c in chapters.items() if c and n != name and expands(drawn, c)}
+        enters[name] = entered - {name}
+    return enters
+
+
+def _below(start: str, enters: dict[str, set[str]]) -> set[str]:
+    """Every flow reached from `start`, `start` among them."""
+    reached, todo = set(), [start]
+    while todo:
+        name = todo.pop()
+        if name not in reached:
+            reached.add(name)
+            todo += enters[name]
+    return reached
+
+
+def _reached(spec: Path, conv: Conventions, report: Report) -> None:
+    """Every flow reachable from the main flow, where the corpus names one (`spe5-sr08`).
+
+    Reached means drawn as a sub-flow of a reached flow, or linked from one. A flow standing beside
+    the main flow and reached by neither is a chapter no reader starting at the top will find.
+
+    Where no main flow is named, nothing can be held to it, and a corpus of unrelated top-level
+    flows passes — the sprawl the one-tree rule is there to prevent. So more than one flow entered
+    from nothing is warned of, with the one reaching the most suggested as the main flow
+    (`spe5-sr10`). Warned and never failed: naming `main_flow` is how a corpus opts into the tree.
+    """
+    enters = _enters(spec, conv)
+    if not conv.main_flow:
+        entered = set().union(*enters.values()) if enters else set()
+        roots = sorted(set(enters) - entered)
+        if len(roots) > 1:
+            likely = max(roots, key=lambda name: (len(_below(name, enters)), -roots.index(name)))
+            report.checked.append(
+                f"warning: {len(roots)} flows are entered from nothing — {', '.join(roots)} — and "
+                f"no main_flow is named, so none is held to one tree. A corpus has one main flow, "
+                f"and a step that is itself a process drills into its own chapter, named for that "
+                f"step. {likely} reaches the most flows ({len(_below(likely, enters))}): name it "
+                f'with main_flow = "{likely}" under [conventions], and draw or link the rest from it')
+        return
+    if conv.main_flow not in enters:
         report.problems.append(
             f"the main flow {conv.main_flow} names no flow in {spec.name}/{conv.flow_dir}/ — "
             f"name a file there matching {conv.flow_glob!r}, or nothing can be reached from it")
         return
-    chapters = {name: node_format.read(path) for name, path in flows.items()}
-    reached, todo = set(), [conv.main_flow]
-    while todo:
-        name = todo.pop()
-        if name in reached:
-            continue
-        reached.add(name)
-        text = flows[name].read_text(encoding="utf-8")
-        todo += [n for n in re.findall(r"\]\(([^)#\s/]+\.md)(?:#[^)]*)?\)", text) if n in flows]
-        chapter = chapters[name]
-        for drawn in (chapter.subflows if chapter else ()):
-            todo += [n for n, c in chapters.items() if c and n != name and expands(drawn, c)]
-    for name in sorted(set(flows) - reached):
+    for name in sorted(set(enters) - _below(conv.main_flow, enters)):
         report.problems.append(
             f"{name} is neither drawn from the main flow nor referenced from a flow that is — draw "
             f"it as a step of {conv.main_flow} or of a flow under it, or link it from one")

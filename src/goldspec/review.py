@@ -445,10 +445,10 @@ def cross_flow(path: Path, siblings: list) -> list[str]:
         if unused:
             found.append(f"{name}#{drawn} takes {', '.join(unused)}, which no step of the chapter "
                          f"it drills into consumes")
-        # The sub-flow and everything it drills into, at whatever depth (`spe5-sr9`): an element
+        # The sub-flow and everything it drills into, at whatever depth (`spe5-sr09`): an element
         # made and taken below the child never left it, so it is not owed at this step.
         elsewhere = _read_elsewhere(siblings, _beneath(Path(child_path), siblings))
-        # `spe5-sr7` — a taker of a PART reads a producer of the whole, and taking the whole is
+        # `spe5-sr07` — a taker of a PART reads a producer of the whole, and taking the whole is
         # not a demand for any particular part. This read the rule backwards: `story` consumed by
         # any chapter made every `story.*` a child produced look wanted, so a parent was told to
         # declare `story.mutation.survived` because an unrelated flow elsewhere took a story.

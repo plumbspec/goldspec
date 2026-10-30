@@ -453,7 +453,7 @@ def test_the_corpus_this_ships_with_still_declares_its_own_kinded_ids(tmp_path):
     assert _KINDED.findall("The argument turns on **the** other chapter's `ch3-U1`, which is open.") == []
 
 
-# ---- the dotted-name rule runs one way per question (`spe5-sr7`) --------------------------------
+# ---- the dotted-name rule runs one way per question (`spe5-sr07`) --------------------------------
 
 PARENT = """# Chapter 1 — a customer places an order
 
@@ -543,7 +543,7 @@ def _corpus(root, parent_text, neighbour_consumes):
 
 
 def test_taking_the_whole_elsewhere_is_not_a_demand_for_a_part(tmp_path):
-    """`spe5-sr7`. A neighbour consuming `order` does not make `order.grade` need declaring.
+    """`spe5-sr07`. A neighbour consuming `order` does not make `order.grade` need declaring.
 
     This read the rule backwards, so any chapter anywhere taking `order` made every `order.*` a
     child produced look wanted — and a parent was told to declare something because an unrelated
