@@ -2,6 +2,38 @@
 
 What each release gives you, and what to change to take it.
 
+## 0.5.0 — a file is named for its ids' prefix
+
+**A file is named for its ids' prefix.** `chapter-1-….md` holds `ch1`, `chapter-1.09-….md` holds
+`ch1-09`, and `chapter-01-….md` holds `ch01`.
+
+**Every id in a series has the same number of digits**, as many as its largest needs. Every
+reference to it carries the same digits: the id where it is declared, a test's citation, a link,
+and a file name. A series is one kind of id under one parent:
+
+| series | up to nine | ten or more |
+|---|---|---|
+| chapters | `ch1` … `ch9`, in `chapter-1-….md` | `ch01` … `ch10`, in `chapter-01-….md` |
+| a flow's steps | `ch1-1` … `ch1-9` | `ch1-01` … `ch1-10` |
+| a drill-down's file | `chapter-1.3-….md` | `chapter-1.03-….md` |
+| a drill-down's steps | `ch1-3-1` … `ch1-3-9` | `ch1-3-01` … `ch1-3-10` |
+| one step's user requirements | `ch1-3-ur1` … `ur9` | `ch1-3-ur01` … `ur10` |
+| one step's system requirements | `ch1-3-sr1` … `sr9` | `ch1-3-sr01` … `sr10` |
+| one step's non-functional requirements | `ch1-3-nfr1` … `nfr9` | `ch1-3-nfr01` … `nfr10` |
+| one step's unknowns | `ch1-3-u1` … `u9` | `ch1-3-u01` … `u10` |
+| one step's Information rows | `ch1-3-inf1` … `inf9` | `ch1-3-inf01` … `inf10` |
+| a chapter's decisions | `ch1-D1` … `D9` | `ch1-D01` … `D10` |
+| a chapter's parameters | `ch1-P1` … `P9` | `ch1-P01` … `P10` |
+
+Reaching ten renumbers the whole series and every reference to it. A tenth step turns
+`@pytest.mark.proves("ch1-3")` into `proves("ch1-03")`, turns `[charging](chapter-1.3-charging.md)`
+into `[charging](chapter-1.03-charging.md)`, and turns the requirement `ch1-3-ur1` into
+`ch1-03-ur1`.
+
+**To take it:** rename a file whose name carries a zero its ids don't. `chapter-01-ordering.md`
+holding `ch1` becomes `chapter-1-ordering.md`, and `main_flow` and any links naming it change with
+it. The gate names every file that needs it.
+
 ## 0.4.0 — one main flow, said on the front page and by the gate
 
 **A corpus of top-level flows side by side is warned of.** Where no `main_flow` is named, the gate
