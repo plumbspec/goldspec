@@ -143,7 +143,7 @@ def _flow_files(spec: Path, conv: Conventions) -> list[Path]:
 def _chapter_prefix(md: Path, conv: Conventions) -> str:
     """The namespace every id in one flow file carries.
 
-    Two naming conventions, and the file says which it is in. ``chapter-01.2-gate.md`` numbers its
+    Two naming conventions, and the file says which it is in. ``chapter-1.2-gate.md`` numbers its
     chapters, so the prefix is the namespace and that number: ``ch1-2``. A file named for its flow —
     ``dev07-run-plumb.md``, ``spe-specify-a-process.md`` — carries the sigil itself, so the prefix is
     the leading segment, and a sub-flow's file keeps the parent's number with it.
@@ -154,14 +154,16 @@ def _chapter_prefix(md: Path, conv: Conventions) -> str:
     """
     stem = conv.flow_glob.replace("*", "").removesuffix(".md").rstrip("-")
     if stem:
-        # Every number the name carries, at whatever depth: `chapter-01.2.2-…` expands `ch1-2-2`
+        # Every number the name carries, at whatever depth: `chapter-1.2.2-…` expands `ch1-2-2`
         # (`spe1-sr5`). Reading only the first two let a third-level chapter file its steps under
         # any step of its grandparent and pass.
+        #
+        # A file is named for its ids' prefix (`spe1-sr6`), so each number is taken as written:
+        # `chapter-1.09-…` holds `ch1-09`.
         found = re.match(rf"{re.escape(stem)}-(\d+)((?:\.\d+)*)", md.name)
         if found:
             major, rest = found.groups()
-            return f"{conv.namespace}{int(major)}" + "".join(
-                f"-{int(n)}" for n in rest.split(".")[1:])
+            return f"{conv.namespace}{major}" + "".join(f"-{n}" for n in rest.split(".")[1:])
     # The sigil the project declared, taken off the front of the filename with whatever number
     # follows it: `dev07-6-append-...` -> `dev07-6`, `ado-bring-...` -> `ado`. Read against the
     # declared namespace rather than off the first word, because a flow may be named for its reader

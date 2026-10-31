@@ -5,11 +5,11 @@
 This walks one complete chapter part by part, inside the shape every corpus takes: **one main flow,
 and a drill-down for each step that is itself a process.**
 
-    chapter-01-ordering.md            the main flow: ch1-1 take the order … ch1-4 tell the customer
-    └── chapter-01.3-charging.md      step ch1-3, charging, is a process of its own: ch1-3-1 …
+    chapter-1-ordering.md            the main flow: ch1-1 take the order … ch1-4 tell the customer
+    └── chapter-1.3-charging.md      step ch1-3, charging, is a process of its own: ch1-3-1 …
 
 Both ship in [`docs/example/`](example/), with
-[`chapter-01-ordering.md`](example/spec/diagrams/chapter-01-ordering.md) named as the main flow,
+[`chapter-1-ordering.md`](example/spec/diagrams/chapter-1-ordering.md) named as the main flow,
 and goldspec's own test suite runs the gate over them on every run, so what you read here is what
 the gate accepts. A second chapter is a drill-down of a step, or a process this one links to (§2);
 never a second top-level flow beside the first.
@@ -95,18 +95,22 @@ So a step that is itself a process gets its own file, and the file name carries 
 
 | File | ids inside it |
 |---|---|
-| `chapter-01-ordering.md` | `ch1-1`, `ch1-2`, … |
-| `chapter-01.3-charging.md` | `ch1-3-1`, `ch1-3-2`, … |
-| `chapter-01.3.2-retries.md` | `ch1-3-2-1`, `ch1-3-2-2`, … |
+| `chapter-1-ordering.md` | `ch1-1`, `ch1-2`, … |
+| `chapter-1.3-charging.md` | `ch1-3-1`, `ch1-3-2`, … |
+| `chapter-1.3.2-retries.md` | `ch1-3-2-1`, `ch1-3-2-2`, … |
 
-`chapter-01.3-charging.md` is the drill-down of node `ch1-3`. Every id inside it is prefixed
+`chapter-1.3-charging.md` is the drill-down of node `ch1-3`. Every id inside it is prefixed
 `ch1-3`, and in the parent that node is drawn as a **sub-flow** — `[[…]]` `:::subroutine` — so a
 reader knows to follow it. **A drill-down of a drill-down keeps every number**, separated by dots:
-`chapter-01.3.2-….md` expands step `ch1-3-2`, and its ids are prefixed `ch1-3-2`.
+`chapter-1.3.2-….md` expands step `ch1-3-2`, and its ids are prefixed `ch1-3-2`.
+
+**A file is named for its ids' prefix.** `chapter-1-….md` holds `ch1`, `chapter-1.09-….md` holds
+`ch1-09`, and `chapter-01-….md` holds `ch01`. Ids are padded (§8), so the names pad with them and
+list in order.
 
 The worked example carries one: step `ch1-3` of
-[`chapter-01-ordering.md`](example/spec/diagrams/chapter-01-ordering.md) drills into
-[`chapter-01.3-charging.md`](example/spec/diagrams/chapter-01.3-charging.md). Its other steps are
+[`chapter-1-ordering.md`](example/spec/diagrams/chapter-1-ordering.md) drills into
+[`chapter-1.3-charging.md`](example/spec/diagrams/chapter-1.3-charging.md). Its other steps are
 plain actions, because they did not need one.
 
 **A sub-chapter carries all the same sections.** It is a flow like any other; nothing about it is
@@ -158,7 +162,7 @@ its steps, or as a step of a flow under it, or linked from one that is. A reader
 top can then find every chapter, and a flow nobody reaches is one nobody will read.
 
 **Every other flow is a drill-down of the step it is entered from, and is named for that step.**
-A flow entered at `ch1-3` is `chapter-01.3-….md` (or `ch1-3-….md` in a corpus whose files are named
+A flow entered at `ch1-3` is `chapter-1.3-….md` (or `ch1-3-….md` in a corpus whose files are named
 by sigil), and its steps are `ch1-3-1`, `ch1-3-2`. The file names alone then show the tree, and
 nobody has to open a file to find out where it sits. A second root, named for nothing in the tree,
 is the sprawl this rule is there to prevent.
@@ -169,9 +173,9 @@ is the sprawl this rule is there to prevent.
   give it a chapter named for that step.
 - **Another business process the work leaves for** — billing, after a clinic has treated somebody;
   the warehouse, after the shop has taken an order. Do not draw it. **Link it**: put a markdown link
-  to its file, `[billing](chapter-01.5.3-billing.md)`, in the prose of a chapter that is reached —
+  to its file, `[billing](chapter-1.5.3-billing.md)`, in the prose of a chapter that is reached —
   the chapter's introduction or a node's text both count. Name the linked chapter for the step that
-  hands off, exactly as for a drill-down: a hand-off at `ch1-5-3` is `chapter-01.5.3-billing.md`,
+  hands off, exactly as for a drill-down: a hand-off at `ch1-5-3` is `chapter-1.5.3-billing.md`,
   with steps `ch1-5-3-1`, … — so the names still show the tree. Any of its steps may take what is
   handed over with provenance `parent` (§4).
 
@@ -182,13 +186,13 @@ is the sprawl this rule is there to prevent.
   the flow on past the step that links.
 
   **The linked chapter must exist when the link does.** A link to a file named like a flow that is
-  not in the flow directory is a fault — `chapter-01-ordering.md links chapter-01.5.3-billing.md,
+  not in the flow directory is a fault — `chapter-1-ordering.md links chapter-1.5.3-billing.md,
   which is not a flow in spec/diagrams/` — so write the hand-off chapter first, or add the link in
   the same edit that creates it.
 
   **Where the other process already has a spec of its own** — another team's, in its own namespace
   — link into theirs rather than writing a second one, with a relative path:
-  `[billing](../../billing/spec/diagrams/chapter-01-billing.md)`. Declare that spec under
+  `[billing](../../billing/spec/diagrams/chapter-1-billing.md)`. Declare that spec under
   `siblings` (§11), and the run reads what its chapters take, so what you hand over stops being
   listed as an observation (§9); it never checks them. A link carrying a path is **not followed**:
   it neither reaches a flow nor is checked for existence, so a wrong path is caught by nobody. A
@@ -201,7 +205,7 @@ One consequence catches people. **Something a sub-flow produces that a linked ch
 left the sub-flow**, so the parent's node for that sub-flow must list it as an `Out`. Leave it off
 and the gate says so:
 
-    chapter-01-ordering.md#ch1-5 does not declare charge request, which the chapter it drills into
+    chapter-1-ordering.md#ch1-5 does not declare charge request, which the chapter it drills into
       produces and another chapter consumes
 
 goldspec's own spec is laid out this way: `spe-specify-a-process.md` is the main flow;
@@ -213,11 +217,11 @@ neither drawn from it nor linked from a flow that is reached is a fault.** Left 
 be held to it, so the run warns instead when more than one flow is entered from nothing — no other
 flow drills into it or links to it — and suggests the one that reaches the most:
 
-    goldspec: warning: 2 flows are entered from nothing — chapter-01-ordering.md, chapter-02-returns.md — and no main_flow is named, …
+    goldspec: warning: 2 flows are entered from nothing — chapter-1-ordering.md, chapter-2-returns.md — and no main_flow is named, …
 
  *Drawn* means a step drawn
 as a sub-flow, `[[…]]`, whose chapter's steps are numbered under it. *Linked* means a markdown link to
-the flow's file by its bare name — a file in the same directory — `[…](chapter-01.3-charging.md)`,
+the flow's file by its bare name — a file in the same directory — `[…](chapter-1.3-charging.md)`,
 anywhere in a reached flow. A flow
 entered from several places — the same hand-over used by more than one step — is linked from where
 it is entered rather than drawn twice. A flow that is only ever linked, and drawn nowhere, is
@@ -384,7 +388,7 @@ flowchart TD
 promise the gate collects: a node drawn as a sub-flow with no chapter expanding it is reported as
 `is drawn as a sub-flow and no chapter expands it`. While `ch1-3` is still one step, draw it as an
 ordinary action; redraw it as a sub-flow in the same edit that creates
-`chapter-01.3-charging.md`.
+`chapter-1.3-charging.md`.
 
 In the parent, a sub-flow node keeps an ordinary `###` block with its Information table stated at
 the parent's altitude — what the whole sub-process takes and leaves, not what its steps do. The two
@@ -398,10 +402,10 @@ on the Description cell, by the rule in §4, so the two files have to spell a th
 
 **Everything in the child is prefixed by the parent's node id**, and nothing about the child is
 abbreviated — same sections, same legend, same stamp. The worked example's
-[`chapter-01.3-charging.md`](example/spec/diagrams/chapter-01.3-charging.md) is one, and this is
+[`chapter-1.3-charging.md`](example/spec/diagrams/chapter-1.3-charging.md) is one, and this is
 how its names line up with the parent's:
 
-| in the parent | in the child `chapter-01.3-charging.md` |
+| in the parent | in the child `chapter-1.3-charging.md` |
 |---|---|
 | node `ch1-3`, drawn `[[…]]` `:::subroutine` | its steps are `ch1-3-1`, `ch1-3-2`, … |
 | — | an Information row is `ch1-3-1-inf1` — node id, then kind, then number |
@@ -422,7 +426,7 @@ and a title that disagrees with the parent's node text is a thing only a reader 
 **Node labels may carry markup, and usually should.** The snippets on this page are written plainly
 so the shape is visible, but real labels get long: `<b>ch1-1</b>` sets the id off from the text and
 `<br/>` wraps a label that would otherwise stretch the diagram into one very wide row. The
-[worked example](example/spec/diagrams/chapter-01-ordering.md) does both. Nothing is checked here —
+[worked example](example/spec/diagrams/chapter-1-ordering.md) does both. Nothing is checked here —
 it is the legibility rule again, applied to the drawing.
 
 ---
@@ -569,7 +573,7 @@ under it:
     ---
 
 That is the normal state of a chapter somebody is still writing, and the [worked
-example](example/spec/diagrams/chapter-01-ordering.md) carries three of them.
+example](example/spec/diagrams/chapter-1-ordering.md) carries three of them.
 
 **Parameters and decisions live at the foot of the node they constrain.** There is no
 `## Parameters` section and no `## Decisions` section — adding one fails the section-set check, and
@@ -609,7 +613,7 @@ what make that read: an unknown is a bullet in a list belonging to one step, so 
 A parameter and a decision are run-in paragraphs that may hang off a node or off the whole flow,
 so they share one series per chapter — `ch1-P1`, `ch1-D1` — and a chapter's third decision is
 `ch1-D3` wherever in the file it is written. *The chapter* means the file's whole prefix: in the
-drill-down `chapter-01.3-charging.md` a parameter is `ch1-3-P1` and a decision `ch1-3-D1`, as in
+drill-down `chapter-1.3-charging.md` a parameter is `ch1-3-P1` and a decision `ch1-3-D1`, as in
 §3's table — never a continuation of `ch1`'s series.
 
 **Unknown or parameter?** Both are not-knowing. An unknown is settled by *deciding*; a parameter is
@@ -706,7 +710,7 @@ for the glossary should never have to hunt for it.
 
 ### A whole chapter, to copy
 
-Every part above in one file, with one node. Save it as `spec/diagrams/chapter-01-<process>.md`
+Every part above in one file, with one node. Save it as `spec/diagrams/chapter-1-<process>.md`
 and it passes the gate as it stands — the one thing the run says about it is an observation that
 nothing takes `what it leaves`. Then replace every placeholder: the stamp's date, the
 angle-bracketed text (the diagram's `<b>` is markup and stays), the diagram's labels, the step's
@@ -834,16 +838,16 @@ Run from `docs/example/`, the worked example gives:
 
     $ goldspec spec
     goldspec: conventions from goldspec.toml
-    goldspec: conventions: ids namespaced 'ch', flows in diagrams/chapter-*.md, main flow chapter-01-ordering.md
+    goldspec: conventions: ids namespaced 'ch', flows in diagrams/chapter-*.md, main flow chapter-1-ordering.md
     goldspec: 14 subject(s) declared in spec/
     goldspec: 0 cited id(s) read from .
     goldspec: 2 process flow(s) render
     goldspec: 2 of 2 chapter(s) in the node format, 8 node(s)
-    goldspec: chapter-01-ordering.md: 2 observation(s) — an element nothing downstream takes …
-    goldspec:   chapter-01-ordering.md#ch1-2 leaves with refusal, reservation, which nothing …
-    goldspec:   chapter-01-ordering.md#ch1-4 leaves with confirmation, which nothing …
-    goldspec: chapter-01.3-charging.md: 1 observation(s) — an element nothing downstream takes …
-    goldspec:   chapter-01.3-charging.md#ch1-3-4 leaves with decline, which nothing …
+    goldspec: chapter-1-ordering.md: 2 observation(s) — an element nothing downstream takes …
+    goldspec:   chapter-1-ordering.md#ch1-2 leaves with refusal, reservation, which nothing …
+    goldspec:   chapter-1-ordering.md#ch1-4 leaves with confirmation, which nothing …
+    goldspec: chapter-1.3-charging.md: 1 observation(s) — an element nothing downstream takes …
+    goldspec:   chapter-1.3-charging.md#ch1-3-4 leaves with decline, which nothing …
     0 fault(s) in spec
 
 Exit `0` clean, `1` with faults, `2` when the run could not start — a `goldspec.toml` that cannot
@@ -882,13 +886,13 @@ can point at them, and neither is in that number. `node(s)` is the one to check 
 
 Faults name the file, the id where one applies, and what to do:
 
-    chapter-01-ordering.md#ch1-2 needs coupon, which no earlier step produces — either
+    chapter-1-ordering.md#ch1-2 needs coupon, which no earlier step produces — either
       a step is missing an output, or a step is missing
-    chapter-01-ordering.md#ch1-5 is drawn in the flow and has no node block — the
+    chapter-1-ordering.md#ch1-5 is drawn in the flow and has no node block — the
       diagram is the authority and the expansion is what a reader follows it into
-    chapter-01-ordering.md: sections are ['Glossary', 'Nodes'], not ['Nodes',
+    chapter-1-ordering.md: sections are ['Glossary', 'Nodes'], not ['Nodes',
       'Glossary'] — a reader looking for the glossary should never have to hunt for it
-    chapter-01-ordering.md#ch1-2 takes coupon from ch1-1, which does not produce it
+    chapter-1-ordering.md#ch1-2 takes coupon from ch1-1, which does not produce it
 
 The last one catches a habit rather than a typo: a row names where its information came from, and a
 row naming a step that never produced the thing reads exactly as authoritative as one that did.
@@ -1057,7 +1061,7 @@ namespace = "ord"              # ids read ord1-1, ord1-2
 flow_dir  = "flows"            # where the process flows live, relative to the spec
 flow_glob = "story-*.md"       # how a flow file is named
 siblings  = ["../shared/spec"] # more of this corpus, read for what it defines, never checked
-main_flow = "story-01-orders.md" # the flow the corpus starts from, by file name in flow_dir — §2
+main_flow = "story-1-orders.md" # the flow the corpus starts from, by file name in flow_dir — §2
 ```
 
 Every key is optional, and the defaults are our habits: `namespace = "ch"`, `flow_dir = "diagrams"`,
@@ -1073,26 +1077,28 @@ default:
 
 ```toml
 [conventions]
-main_flow = "chapter-01-ordering.md"
+main_flow = "chapter-1-ordering.md"
 ```
 
-**The file name decides the id prefix, and it is checked.** The namespace, then the number the
-file name carries, and a drill-down keeps its parent's number with it:
+**The file name is the id prefix, and it is checked.** The namespace, then each number in the name,
+joined by hyphens; a drill-down keeps its parent's numbers:
 
 | `flow_glob` | `namespace` | the file | the prefix every id in it carries |
 |---|---|---|---|
-| `chapter-*.md` | `ch` | `chapter-01-ordering.md` | `ch1` |
-| `chapter-*.md` | `ch` | `chapter-01.3-charging.md` | `ch1-3` |
-| `chapter-*.md` | `ch` | `chapter-01.3.2-retries.md` | `ch1-3-2` |
-| `flow-*.md` | `req` | `flow-01-repairs.md` | `req1` |
-| `story-*.md` | `ord` | `story-07.2-refunds.md` | `ord7-2` |
+| `chapter-*.md` | `ch` | `chapter-1-ordering.md` | `ch1` |
+| `chapter-*.md` | `ch` | `chapter-1.3-charging.md` | `ch1-3` |
+| `chapter-*.md` | `ch` | `chapter-1.3.2-retries.md` | `ch1-3-2` |
+| `chapter-*.md` | `ch` | `chapter-1.09-step-nine.md` | `ch1-09`, a padded step |
+| `chapter-*.md` | `ch` | `chapter-01-ordering.md` | `ch01`, in a corpus of ten or more chapters |
+| `flow-*.md` | `req` | `flow-1-repairs.md` | `req1` |
+| `story-*.md` | `ord` | `story-7.2-refunds.md` | `ord7-2` |
 | `*-*.md` | `spe` | `spe6-2-3-1-share-a-word-across-owners.md` | `spe6-2-3-1` |
 
 The last row is a file named by sigil, as goldspec's own spec is: the prefix is the namespace and
 every number that follows it in the file name, at whatever depth. Get the number wrong and every id
 in the file is reported:
 
-    chapter-01.4-charging.md#ch1-3-1 is not namespaced to its chapter — expected ch1-4-<n>, or the
+    chapter-1.4-charging.md#ch1-3-1 is not namespaced to its chapter — expected ch1-4-<n>, or the
       file name carries the wrong number for the step it expands; …
 
 **That fault cannot say which side is wrong**, because it only sees that the file name and the ids
@@ -1178,7 +1184,7 @@ it; who measured it, and when, is history. The gate catches only some phrasings 
 them by reading, not by waiting for a fault.
 
 **A parameter about a sub-flow's work lives in the child chapter.** How long to wait for the
-processor is a property of charging, so the example states it in `chapter-01.3-charging.md` as
+processor is a property of charging, so the example states it in `chapter-1.3-charging.md` as
 `ch1-3-P1`, hung off the step it tunes. It belongs in the parent, in the parent's series, only when
 it tunes the parent's own step.
 
@@ -1207,7 +1213,7 @@ converted and what it retired *is* the change.
 
 ## Where to go next
 
-- **[The worked example](example/spec/diagrams/chapter-01-ordering.md)** — the chapter above and
+- **[The worked example](example/spec/diagrams/chapter-1-ordering.md)** — the chapter above and
   its drill-down, shipped in a spec directory you can copy and run `goldspec` against.
 - **[Plumb](https://plumbspec.org/)** — derives whether a story is actually proven by a test run.
   goldspec checks that what you wrote down is coherent; Plumb checks that the code honours it.

@@ -93,7 +93,7 @@ _NODE = re.compile(r"^###\s+`?([A-Za-z]+\d[\w.\-]*\d|[A-Za-z]+\d)`?\s*[·—-]?\
 #: other emphasis, which is the shape both a parameter and a decision are written in and the shape a
 #: sentence about somebody else's unknown never has.
 #: The chapter number is OPTIONAL. `[A-Za-z]+\d+` assumed every chapter is numbered — true of
-#: `chapter-01-ordering.md` giving `ch1`, and false of a corpus that names its flows by sigil, where
+#: `chapter-1-ordering.md` giving `ch1`, and false of a corpus that names its flows by sigil, where
 #: the prefix is `hol` or `snd` and the nodes are `hol1`, `snd1`. A decision written `snd-D1`, which
 #: is the only spelling consistent with those nodes, matched nothing: it was declared nowhere, held
 #: to no namespace, and the run reported no fault — the gate could not see it to refuse it.

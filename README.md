@@ -5,8 +5,8 @@ information it moves, the requirements that hold it and the questions still open
 keep all of it honest.
 
 **A chapter is a process flow, and a corpus is one main flow with one tree under it.** A step that
-is itself a process drills into its own chapter, named for that step — `chapter-01.3-charging.md`
-expands step `ch1-3` of `chapter-01-ordering.md` — so the file names alone show where every chapter
+is itself a process drills into its own chapter, named for that step — `chapter-1.3-charging.md`
+expands step `ch1-3` of `chapter-1-ordering.md` — so the file names alone show where every chapter
 sits. Not a set of top-level flows side by side: name the one the corpus starts from with
 `main_flow`, and the gate fails any flow that is not reached from it; leave it unnamed, and the gate
 warns when more than one flow is entered from nothing, and suggests which is the main one.
@@ -88,7 +88,7 @@ namespace = "sh"                  # the prefix every subject id carries
 flow_dir  = "flows"               # where the process flows live, relative to the spec
 flow_glob = "story-*.md"          # how a flow file is named
 siblings = ["../other/spec"]      # more of this corpus, read for what it defines, never checked
-main_flow = "story-01-orders.md"  # the one flow the corpus starts from; every flow must be reached from it
+main_flow = "story-1-orders.md"  # the one flow the corpus starts from; every flow must be reached from it
 ```
 
 Those five keys are the whole set — shown here with values that differ from the defaults
@@ -129,7 +129,7 @@ is what tells you which happened.
 Every run says which conventions it judged by, and where they came from:
 
     goldspec: conventions from spec/goldspec.toml
-    goldspec: conventions: ids namespaced 'sh', flows in flows/story-*.md, main flow story-01-orders.md
+    goldspec: conventions: ids namespaced 'sh', flows in flows/story-*.md, main flow story-1-orders.md
 
 The second line ends with the main flow only where `main_flow` is named. Both are worth reading
 when a fault surprises you: every message this gate emits is phrased as a verdict on your spec, and

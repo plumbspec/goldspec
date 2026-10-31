@@ -43,12 +43,12 @@ def test_the_example_is_a_main_flow_with_a_drill_down_held_to_one_tree():
     gate holds the tree, and a chapter that drills into one of its steps — never two top-level flows
     side by side, which is what a reader copying the example would otherwise learn."""
     conv = conventions_for(EXAMPLE)
-    assert conv.main_flow == "chapter-01-ordering.md"
+    assert conv.main_flow == "chapter-1-ordering.md"
     flows = sorted(p.name for p in (EXAMPLE / conv.flow_dir).glob(conv.flow_glob))
-    assert flows == ["chapter-01-ordering.md", "chapter-01.3-charging.md"]
+    assert flows == ["chapter-1-ordering.md", "chapter-1.3-charging.md"]
     tutorial = TUTORIAL.read_text(encoding="utf-8")
     opening = tutorial[:tutorial.index("## 1.")]
-    assert "one main flow" in opening and "chapter-01.3-charging.md" in opening, (
+    assert "one main flow" in opening and "chapter-1.3-charging.md" in opening, (
         "the tutorial shows the tree before it walks a chapter")
 
 
@@ -110,7 +110,7 @@ def test_the_tutorial_and_the_example_define_the_same_classes():
         return set(re.findall(r"classDef\s+(\w+)", text))
 
     tutorial = classes(TUTORIAL.read_text(encoding="utf-8"))
-    example = classes((EXAMPLE / "diagrams" / "chapter-01-ordering.md").read_text(encoding="utf-8"))
+    example = classes((EXAMPLE / "diagrams" / "chapter-1-ordering.md").read_text(encoding="utf-8"))
 
     assert tutorial and example, "one of them stopped carrying classDef lines at all"
     assert tutorial == example, (

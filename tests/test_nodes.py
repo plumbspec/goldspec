@@ -90,7 +90,7 @@ flowchart TD
 
 
 def _chapter(tmp_path: Path, text: str = CLEAN) -> Path:
-    path = tmp_path / "chapter-01-ordering.md"
+    path = tmp_path / "chapter-1-ordering.md"
     path.write_text(text, encoding="utf-8")
     return path
 
@@ -199,7 +199,7 @@ def test_citing_another_chapters_unknown_is_not_declaring_one(tmp_path):
 def _spec(tmp_path: Path, text: str) -> Path:
     spec = tmp_path / "spec" / "diagrams"
     spec.mkdir(parents=True)
-    (spec / "chapter-01-ordering.md").write_text(text, encoding="utf-8")
+    (spec / "chapter-1-ordering.md").write_text(text, encoding="utf-8")
     return tmp_path / "spec"
 
 
@@ -259,7 +259,7 @@ def test_the_worked_example_begins_and_ends_where_it_is_drawn_to():
     from goldspec.flowcheck import terminals
     from goldspec.nodes import mermaid_blocks
 
-    text = Path("docs/example/spec/diagrams/chapter-01-ordering.md").read_text(encoding="utf-8")
+    text = Path("docs/example/spec/diagrams/chapter-1-ordering.md").read_text(encoding="utf-8")
     starts, ends = terminals("\n".join(mermaid_blocks(text)))
     assert starts == ["START"]
     assert sorted(ends) == ["DONE", "SHORT"]
@@ -427,7 +427,7 @@ def test_working_notes_are_exempt_only_where_they_belong(tmp_path):
 def test_a_chapter_named_by_its_sigil_can_declare_a_decision(tmp_path):
     """A corpus that names its flows by sigil has a prefix with no number in it.
 
-    `chapter-01-ordering.md` gives `ch1`, so `ch1-D1` reads. A flow named `snd-send-what-a-run-
+    `chapter-1-ordering.md` gives `ch1`, so `ch1-D1` reads. A flow named `snd-send-what-a-run-
     produced.md` gives `snd`, its nodes are `snd1`..`snd4`, and the only spelling consistent with
     those is `snd-D1` — which matched nothing. It was declared nowhere and held to no namespace,
     and the run reported no fault, because the gate could not see it in order to refuse it.
@@ -531,9 +531,9 @@ def _corpus(root, parent_text, neighbour_consumes):
     """A parent with a sub-flow, its child, and a neighbouring chapter that consumes something."""
     flows = root / "diagrams"
     flows.mkdir(parents=True)
-    (flows / "chapter-01-ordering.md").write_text(parent_text, encoding="utf-8")
-    (flows / "chapter-01.2-assessing.md").write_text(CHILD, encoding="utf-8")
-    (flows / "chapter-09-elsewhere.md").write_text(
+    (flows / "chapter-1-ordering.md").write_text(parent_text, encoding="utf-8")
+    (flows / "chapter-1.2-assessing.md").write_text(CHILD, encoding="utf-8")
+    (flows / "chapter-9-elsewhere.md").write_text(
         PARENT.replace("# Chapter 1 —", "# Chapter 9 —").replace("ch1-", "ch9-")
               .replace("SUB[[ch9-2 assess it]]:::subroutine", "SUB[ch9-2 assess it]:::process")
               .replace("| ch9-1-inf1 | In | `basket` | yes | authored |",
@@ -552,7 +552,7 @@ def test_taking_the_whole_elsewhere_is_not_a_demand_for_a_part(tmp_path):
     from goldspec.review import cross_flow
 
     root = _corpus(tmp_path / "whole", PARENT, "order")
-    found = cross_flow(root / "diagrams" / "chapter-01-ordering.md",
+    found = cross_flow(root / "diagrams" / "chapter-1-ordering.md",
                        sorted((root / "diagrams").glob("*.md")))
     assert not [f for f in found if "does not declare" in f], found
 
@@ -566,6 +566,6 @@ def test_taking_a_part_elsewhere_is_a_demand_the_parent_must_carry(tmp_path):
     from goldspec.review import cross_flow
 
     root = _corpus(tmp_path / "part", PARENT, "order.grade")
-    found = cross_flow(root / "diagrams" / "chapter-01-ordering.md",
+    found = cross_flow(root / "diagrams" / "chapter-1-ordering.md",
                        sorted((root / "diagrams").glob("*.md")))
     assert [f for f in found if "does not declare" in f and "order.grade" in f], found

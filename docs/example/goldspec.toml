@@ -7,4 +7,4 @@
 # The main flow is not a default, because there is none: naming it is what holds every other chapter
 # to the one tree under it.
 [conventions]
-main_flow = "chapter-01-ordering.md"
+main_flow = "chapter-1-ordering.md"

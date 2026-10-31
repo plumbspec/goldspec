@@ -77,7 +77,7 @@ flowchart TD
 
 
 def _foreign_spec(root: Path) -> Path:
-    chapter = root / "spec" / "diagrams" / "chapter-01-example.md"
+    chapter = root / "spec" / "diagrams" / "chapter-1-example.md"
     chapter.parent.mkdir(parents=True, exist_ok=True)
     chapter.write_text(FOREIGN, encoding="utf-8")
     return root / "spec"
@@ -357,16 +357,16 @@ def test_a_sibling_spec_is_actually_read(tmp_path):
     from goldspec.conventions import Conventions
 
     here = Path(__file__).resolve().parent.parent / "docs/example/spec/diagrams"
-    base = (here / "chapter-01-ordering.md").read_text(encoding="utf-8")
+    base = (here / "chapter-1-ordering.md").read_text(encoding="utf-8")
 
     mine = tmp_path / "mine" / "diagrams"
     mine.mkdir(parents=True)
-    (mine / "chapter-01-ordering.md").write_text(base, encoding="utf-8")
+    (mine / "chapter-1-ordering.md").write_text(base, encoding="utf-8")
 
     theirs = tmp_path / "theirs" / "diagrams"
     theirs.mkdir(parents=True)
     # A neighbour that plainly consumes what chapter 1 leaves with.
-    (theirs / "chapter-09-fulfilment.md").write_text(
+    (theirs / "chapter-9-fulfilment.md").write_text(
         base.replace("ch1", "ch9").replace("Chapter 1", "Chapter 9")
             .replace("| ch9-1-inf1 | In | `basket` | yes | authored |",
                      "| ch9-1-inf1 | In | `confirmation` | yes | authored |"),
@@ -394,7 +394,7 @@ def test_the_padding_check_runs_under_a_projects_own_conventions(tmp_path):
     from goldspec.conventions import Conventions
 
     here = Path(__file__).resolve().parent.parent / "docs/example/spec/diagrams"
-    base = (here / "chapter-01-ordering.md").read_text(encoding="utf-8")
+    base = (here / "chapter-1-ordering.md").read_text(encoding="utf-8")
     mixed = base.replace("ch1-1-ur2 -", "ch1-1-ur02 -")
 
     def faults_for(conv, name):
@@ -403,9 +403,9 @@ def test_the_padding_check_runs_under_a_projects_own_conventions(tmp_path):
         (flows / name).write_text(mixed.replace("ch1", conv.namespace + "1"), encoding="utf-8")
         return [p for p in check_spec_directory(tmp_path / name, conv).problems if "padded" in p]
 
-    assert faults_for(Conventions(), "chapter-01-ordering.md"), "the fixture no longer mixes widths"
+    assert faults_for(Conventions(), "chapter-1-ordering.md"), "the fixture no longer mixes widths"
     assert faults_for(Conventions(namespace="ord", flow_glob="story-*.md"),
-                      "story-01-ordering.md"), (
+                      "story-1-ordering.md"), (
         "the same mixed-width series passes under a custom flow glob — the padding check is "
         "looking for ids under a prefix no project id starts with")
 

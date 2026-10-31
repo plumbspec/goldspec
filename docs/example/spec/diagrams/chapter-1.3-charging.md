@@ -5,7 +5,7 @@
 > **As a customer I want my card charged once for my order, however the processor's answers arrive,
 > so that a slow network is never a second payment out of my account.**
 
-The drill-down of step `ch1-3` in [chapter 1](chapter-01-ordering.md). A charge whose answer never
+The drill-down of step `ch1-3` in [chapter 1](chapter-1-ordering.md). A charge whose answer never
 came back is the hard case: resending it risks charging twice, and dropping it risks an order that
 was paid for and never placed.
 

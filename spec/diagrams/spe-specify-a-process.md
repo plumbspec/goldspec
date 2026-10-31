@@ -111,6 +111,7 @@ flowchart TD
   * spe1-sr4 - a shape carries one meaning across every chapter of the corpus
   * spe1-sr5 - every other flow is a drill-down of the step it is entered from, and its file and
     ids are named for that step — `ch1-3-…` expands `ch1-3` — so the file names alone show the tree
+  * spe1-sr6 - a flow's file is named for its ids' prefix: `chapter-1.09-…` holds `ch1-09-…`
 
 #### Non-Functional Requirements
   * spe1-nfr1 - a flow too dense to read on one sheet has a step in it that is really a process

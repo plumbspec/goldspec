@@ -185,9 +185,9 @@ def nodes_case(text: str, with_neighbour: bool = True) -> dict:
     `with_neighbour=False` drops the sibling and leaves the import naming a home that does not
     exist, which is its own fault class.
     """
-    tree = {"spec/diagrams/chapter-01-example.md": text, "spec/goldspec.toml": NODE_FORMAT_ON}
+    tree = {"spec/diagrams/chapter-1-example.md": text, "spec/goldspec.toml": NODE_FORMAT_ON}
     if with_neighbour:
-        tree["neighbour/diagrams/chapter-03-people.md"] = NEIGHBOUR
+        tree["neighbour/diagrams/chapter-3-people.md"] = NEIGHBOUR
     return tree
 
 #: A parent whose `ch1-2` drills down, and the chapter that expands it. The cross-flow checks
@@ -323,12 +323,12 @@ flowchart TD
 
 def subflow_case(parent: str = PARENT, child: str = CHILD, neighbour: str = None) -> dict:
     """A parent, the chapter it drills into, and optionally a third that reads what the child makes."""
-    tree = {"spec/diagrams/chapter-01-example.md": parent,
-            "spec/diagrams/chapter-01.2-charging.md": child,
+    tree = {"spec/diagrams/chapter-1-example.md": parent,
+            "spec/diagrams/chapter-1.2-charging.md": child,
             "spec/goldspec.toml": NODE_FORMAT_ON,
-            "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR}
+            "neighbour/diagrams/chapter-3-people.md": NEIGHBOUR}
     if neighbour is not None:
-        tree["spec/diagrams/chapter-02-ledger.md"] = neighbour
+        tree["spec/diagrams/chapter-2-ledger.md"] = neighbour
     return tree
 
 
@@ -380,7 +380,7 @@ def one_tree(**extra: str) -> dict:
 
 CASES: dict[str, dict[str, str]] = {
     "clean": {
-        "spec/diagrams/chapter-01-example.md": CLEAN,
+        "spec/diagrams/chapter-1-example.md": CLEAN,
     },
     "main_flow_leaves_a_flow_unreached": one_tree(**{"pay-take-payment.md": PAYING}),
     "main_flow_names_no_flow": {**one_tree(),
@@ -388,7 +388,7 @@ CASES: dict[str, dict[str, str]] = {
     "flow_without_a_start": {
         # A and B point at each other, so neither is a start; C is reached and reaches nothing,
         # so an end exists and only the start is missing.
-        "spec/diagrams/chapter-01-example.md":
+        "spec/diagrams/chapter-1-example.md":
             CLEAN.replace("""    START([START]):::terminal
     TAKE[ch1-1 take the order]:::process
     CHARGE[ch1-2 charge once]:::process
@@ -397,7 +397,7 @@ CASES: dict[str, dict[str, str]] = {
                           "    A[a] --> B[b]\n    B --> A\n    B --> C[c]"),
     },
     "flow_without_an_end": {
-        "spec/diagrams/chapter-01-example.md":
+        "spec/diagrams/chapter-1-example.md":
             CLEAN.replace("""    START([START]):::terminal
     TAKE[ch1-1 take the order]:::process
     CHARGE[ch1-2 charge once]:::process
@@ -410,16 +410,16 @@ CASES: dict[str, dict[str, str]] = {
         "spec/diagrams/notes.md": "not a chapter, and not matched by chapter-*.md\n",
     },
     "rendering": {
-        "spec/diagrams/chapter-01-example.md":
+        "spec/diagrams/chapter-1-example.md":
             CLEAN.replace("TAKE[ch1-1 take the order]:::process",
                           "TAKE[ch1-1 take the order]:::nosuchclass"),
     },
     "bare_delimiter": {
-        "spec/diagrams/chapter-01-example.md":
+        "spec/diagrams/chapter-1-example.md":
             CLEAN.replace("TAKE[ch1-1 take the order]", "TAKE[ch1-1 take the order (once)]"),
     },
     "classdef_without_colour": {
-        "spec/diagrams/chapter-01-example.md":
+        "spec/diagrams/chapter-1-example.md":
             CLEAN.replace("    TAKE[ch1-1 take the order]:::process",
                           "    TAKE[ch1-1 take the order]:::process\n"
                           "    classDef process fill:#e9eef5,stroke:#2a78d6;"),
@@ -442,32 +442,32 @@ CASES: dict[str, dict[str, str]] = {
         neighbour=LEDGER.replace("| ch2-1-inf1 | In | `reference` | yes | authored |",
                                  "| ch2-1-inf1 | In | `charge` | yes | authored |")),
     "subject_declared_twice": {
-        "spec/diagrams/chapter-01-example.md": CLEAN,
-        "spec/diagrams/chapter-01.9-again.md": CLEAN.replace(
+        "spec/diagrams/chapter-1-example.md": CLEAN,
+        "spec/diagrams/chapter-1.9-again.md": CLEAN.replace(
             "# Chapter 1 — a customer places an order", "# Chapter 1.9 — the same ids again"),
         "spec/goldspec.toml": NODE_FORMAT_ON,
-        "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
+        "neighbour/diagrams/chapter-3-people.md": NEIGHBOUR,
     },
     "link_to_no_flow": one_tree(**{"ord-take-an-order.md": ORDERING.replace(
         "## Nodes", "Paid for in [pay · take payment](pay-take-payment.md).\n\n## Nodes")}),
     "sibling_conventions_unreadable": {
-        "spec/diagrams/chapter-01-example.md": CLEAN,
+        "spec/diagrams/chapter-1-example.md": CLEAN,
         "spec/goldspec.toml": NODE_FORMAT_ON,
         "neighbour/goldspec.toml": '[conventions]\nflows = "story-*.md"\n',
-        "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
+        "neighbour/diagrams/chapter-3-people.md": NEIGHBOUR,
     },
     "cited_a_requirement": {
-        "spec/diagrams/chapter-01-example.md": CLEAN,
+        "spec/diagrams/chapter-1-example.md": CLEAN,
         "spec/goldspec.toml": NODE_FORMAT_ON,
-        "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
+        "neighbour/diagrams/chapter-3-people.md": NEIGHBOUR,
         "tests/test_something.py": (
             "import pytest\n\n\n"
             "@pytest.mark.proves(\"ch1-1-ur1\")\ndef test_a_requirement_rather_than_its_step():\n    pass\n"),
     },
     "cited_and_declared_nowhere": {
-        "spec/diagrams/chapter-01-example.md": CLEAN,
+        "spec/diagrams/chapter-1-example.md": CLEAN,
         "spec/goldspec.toml": NODE_FORMAT_ON,
-        "neighbour/diagrams/chapter-03-people.md": NEIGHBOUR,
+        "neighbour/diagrams/chapter-3-people.md": NEIGHBOUR,
         "tests/test_something.py": (
             "import pytest\n\n\n"
             "@pytest.mark.proves(\"ch1-9\")\ndef test_a_subject_nobody_wrote_down():\n    pass\n"),
@@ -932,14 +932,14 @@ def test_what_a_sub_flow_makes_and_takes_below_itself_never_left_it(tmp_path, ca
 
 @pytest.mark.proves("spe1", depth="wiring")
 def test_a_chapter_three_levels_down_is_held_to_its_whole_number(tmp_path, capsys):
-    """`spe1-sr5` — `chapter-01.2.2-….md` expands `ch1-2-2`, so its steps are `ch1-2-2-1`, … and
+    """`spe1-sr5` — `chapter-1.2.2-….md` expands `ch1-2-2`, so its steps are `ch1-2-2-1`, … and
     not merely anything under `ch1-2`. Reading only the first two numbers let a step file itself
     under the wrong parent and pass."""
     deep = (CLEAN.replace("# Chapter 1 — a customer places an order", "# Chapter 1.2.2 — deeper")
             .replace("ch1-D1", "ch1-2-2-D1").replace("ch1-1", "ch1-2-9").replace("ch1-2", "ch1-2-8")
             .replace("ch1-2-8-9", "ch1-2-9"))
-    tree = {"spec/diagrams/chapter-01-example.md": CLEAN,
-            "spec/diagrams/chapter-01.2.2-deeper.md": deep}
+    tree = {"spec/diagrams/chapter-1-example.md": CLEAN,
+            "spec/diagrams/chapter-1.2.2-deeper.md": deep}
     code = main([str(_write(tmp_path, tree))])
     out = capsys.readouterr().out
     assert code != 0 and "expected ch1-2-2-<n>" in out, out
@@ -950,7 +950,7 @@ def test_a_misnumbered_file_is_reported_as_misnumbered_and_nothing_else(tmp_path
     """`spe5-ur1` — a fault says what to do about it. A chapter whose file name carries the wrong
     number has steps that are drawn and connected; telling the reader they are not in the flow sends
     them to the diagram, and the namespace fault is the one that names the fix — either side."""
-    tree = {"spec/diagrams/chapter-02-example.md": CLEAN}
+    tree = {"spec/diagrams/chapter-2-example.md": CLEAN}
     code = main([str(_write(tmp_path, tree))])
     out = capsys.readouterr().out
     assert code != 0 and "expected ch2-<n>" in out and "or the file name" in out, out
@@ -969,7 +969,7 @@ def test_a_requirement_in_a_dash_or_numbered_bullet_is_named_not_skipped(tmp_pat
     """`spe5-sr04` — a requirement written as `- id - …` or `1. id - …`, the way most documents
     being converted already write them, is named as unread rather than silently dropped."""
     for bullet in ("  - ch1-1-ur1 - ", "1. ch1-1-ur1 - "):
-        tree = {"spec/diagrams/chapter-01-example.md": CLEAN.replace("  * ch1-1-ur1 - ", bullet)}
+        tree = {"spec/diagrams/chapter-1-example.md": CLEAN.replace("  * ch1-1-ur1 - ", bullet)}
         code = main([str(_write(tmp_path / bullet.strip()[0], tree))])
         out = capsys.readouterr().out
         assert code != 0 and "ch1-1-ur1" in out and "shape nothing reads" in out, (bullet, out)
@@ -990,7 +990,7 @@ def test_a_link_to_a_chapter_nobody_wrote_is_reported(tmp_path, capsys):
 def test_a_parameter_is_never_the_end_of_a_flow_whatever_its_style(tmp_path, capsys):
     """A parameter hangs off the step it tunes; it is not where the flow arrives. Drawn without its
     `:::parameter` class it was counted as an ending, so a flow that never ended passed."""
-    tree = {"spec/diagrams/chapter-01-example.md": CLEAN.replace(
+    tree = {"spec/diagrams/chapter-1-example.md": CLEAN.replace(
         """    START([START]):::terminal
     TAKE[ch1-1 take the order]:::process
     CHARGE[ch1-2 charge once]:::process
@@ -1008,10 +1008,10 @@ def test_a_sibling_is_read_under_its_own_conventions(tmp_path, capsys):
     `story-*.md` is read under its own file, not under this spec's `chapter-*.md`, so what this
     spec hands it is seen to be taken there."""
     takes_the_charge = (NEIGHBOUR.replace("`enquiry` | yes | authored", "`charge` | yes | authored"))
-    tree = {"spec/diagrams/chapter-01-example.md": CLEAN,
+    tree = {"spec/diagrams/chapter-1-example.md": CLEAN,
             "spec/goldspec.toml": '[conventions]\nsiblings = ["../neighbour"]\n',
             "neighbour/goldspec.toml": '[conventions]\nflow_glob = "story-*.md"\n',
-            "neighbour/diagrams/story-03-people.md": takes_the_charge}
+            "neighbour/diagrams/story-3-people.md": takes_the_charge}
     spec = _write(tmp_path, tree)
     code = main([str(spec)])
     said = capsys.readouterr()
@@ -1084,3 +1084,70 @@ def test_more_than_one_flow_entered_from_nothing_is_warned_where_no_main_flow_is
 
     main([str(_write(tmp_path / "named", one_tree(**{"pay-take-payment.md": PAYING})))])
     assert "warning" not in capsys.readouterr().err, "with main_flow named it is a fault instead"
+
+
+def _numbered_flow(steps: int, drawn: int) -> str:
+    """A chapter-numbered flow of `steps` steps, padded as the gate requires, whose step `drawn`
+    is a sub-flow. Each step takes what the one before it left."""
+    width = len(str(steps))
+    ids = [f"ch1-{n:0{width}d}" for n in range(1, steps + 1)]
+    names = [f"S{n}" for n in range(1, steps + 1)]
+    shapes = [f"    {name}[[{i} step]]:::subroutine" if n == drawn else f"    {name}[{i} step]:::process"
+              for n, (name, i) in enumerate(zip(names, ids), 1)]
+    nodes = []
+    for n, i in enumerate(ids, 1):
+        taken = "| {i}-inf1 | In | `basket` | yes | authored |" if n == 1 else \
+            f"| {{i}}-inf1 | In | `{'order' if n == drawn else 'charge' if n == drawn + 1 else f'e{n - 1}'}` | yes | {ids[n - 2]} |"
+        # Into the sub-flow goes the order its chapter takes, and out comes the charge it makes.
+        left = "order" if n == drawn - 1 else "charge" if n == drawn else f"e{n}"
+        nodes.append(f"""### {i} · step {n}
+
+> **As a customer I want step {n} done, so that the next one can start.**
+
+#### Information
+
+| Information | IO | Description | Required | Provenance |
+|---|---|---|---|---|
+{taken.format(i=i)}
+| {i}-inf2 | Out | `{left}` | yes | derived |
+
+#### User Requirements
+  * {i}-ur1 - step {n} is done once
+
+#### System Requirements
+
+#### Non-Functional Requirements
+
+#### Unknowns
+""")
+    return (f"# Chapter 1 — {steps} steps\n\n**Last updated** 2026-10-31 v1\n\n"
+            "> **As a customer I want an order taken in steps, so that each can be checked.**\n\n"
+            "```mermaid\nflowchart TD\n    START([START]):::terminal\n" + "\n".join(shapes)
+            + "\n    DONE([END]):::good\n    START --> " + " --> ".join(names) + " --> DONE\n\n"
+            "    classDef terminal fill:#eef0ee,stroke:#52514e,color:#0b0b0b;\n"
+            "    classDef process fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;\n"
+            "    classDef subroutine fill:#e9eef5,stroke:#2a78d6,color:#0b0b0b;\n"
+            "    classDef good fill:#e2f2e2,stroke:#0ca30c,color:#0b0b0b;\n```\n\n## Nodes\n\n"
+            + "\n---\n\n".join(nodes)
+            + "\n## Glossary\n\n| Term | Meaning |\n|---|---|\n| Step | One thing a person does |\n")
+
+
+@pytest.mark.proves("spe1", depth="wiring")
+def test_a_padded_step_drills_into_a_file_named_for_its_number_as_written(tmp_path, capsys):
+    """`spe1-sr6` — a file is named for its ids' prefix. Ten steps are `ch1-01` … `ch1-10`, and
+    step `ch1-09` drills into `chapter-1.09-….md`, whose steps are `ch1-09-1`, …."""
+    tree = {"spec/goldspec.toml": '[conventions]\nmain_flow = "chapter-1-ten-steps.md"\n',
+            "spec/diagrams/chapter-1-ten-steps.md": _numbered_flow(10, drawn=9),
+            "spec/diagrams/chapter-1.09-step-nine.md": drill_down("ch1-09", "step nine")}
+    code = main([str(_write(tmp_path / "padded", tree))])
+    out = capsys.readouterr().out
+    assert code == 0, out
+
+    # The name is the prefix, chapter number included.
+    from goldspec.conventions import Conventions
+    from goldspec.specgate import _chapter_prefix
+    conv = Conventions()
+    assert [_chapter_prefix(Path(name), conv) for name in
+            ("chapter-1-x.md", "chapter-1.3-x.md", "chapter-1.09-x.md", "chapter-1.09.2-x.md",
+             "chapter-01-x.md", "chapter-01.3-x.md")] == \
+        ["ch1", "ch1-3", "ch1-09", "ch1-09-2", "ch01", "ch01-3"]
